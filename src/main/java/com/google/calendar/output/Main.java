@@ -9,8 +9,6 @@ import com.google.calendar.util.ConfigurationFileParser;
 
 public class Main {
 
-	private static String FILE_PATH = "Z:/calendar.xlsx";
-
 	public static void main(final String[] args) {
 		try {
 			final GenerateOutputExcel excelOutput = new GenerateOutputExcel();
@@ -23,7 +21,7 @@ public class Main {
 			createFromAndProjectsRow(excelOutput, configurationFileParser);
 			createToRow(excelOutput, configurationFileParser);
 
-			final FileOutputStream outputStream = new FileOutputStream(FILE_PATH);
+			final FileOutputStream outputStream = new FileOutputStream(GenerateOutputExcel.DESTINATION_FILE_PATH);
 			excelOutput.getWorkbook().write(outputStream);
 			excelOutput.getWorkbook().close();
 		} catch (final Exception e) {
@@ -33,9 +31,9 @@ public class Main {
 	}
 
 
-
 	private static void createStaffAndClientRow(final GenerateOutputExcel excelOutput, final ConfigurationFileParser configurationFileParser) {
 		final Row row4 = excelOutput.getSheet().getRow(3);
+
 		final Cell staffValue = row4.getCell(1);
 		staffValue.setCellValue("Rohit");
 

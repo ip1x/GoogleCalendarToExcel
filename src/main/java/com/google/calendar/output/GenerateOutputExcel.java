@@ -16,7 +16,7 @@ public class GenerateOutputExcel {
 
 	private Workbook workbook;
 	private Sheet sheet;
-	private static String DESTINATION_FILE_PATH = "Z:/calendar.xlsx";
+	public static String DESTINATION_FILE_PATH = "Z:/calendar.xlsx";
 
 	public GenerateOutputExcel() {
 	}
