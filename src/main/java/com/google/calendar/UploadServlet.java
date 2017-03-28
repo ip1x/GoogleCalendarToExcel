@@ -14,8 +14,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -202,7 +204,11 @@ public class UploadServlet extends HttpServlet {
 			// Note: Do not confuse this class with the
 			// com.google.api.services.calendar.model.Calendar class.
 			final com.google.api.services.calendar.Calendar service = getCalendarService();
+
+			Map<String, List<DateTime>> excelData = new HashMap<String, List<DateTime>>();
+			String userName = "";
 			String pageToken = null;
+			
 			do {
 				CalendarList calendarList = service.calendarList().list().setPageToken(pageToken).execute();
 				List<CalendarListEntry> listItems = calendarList.getItems();
@@ -217,12 +223,20 @@ public class UploadServlet extends HttpServlet {
 							System.out.println("No upcoming events found.");
 						} else {
 							System.out.println("Upcoming events");
-							for (final Event event : items) {
+
+							userName = items.get(0).getCreator().getDisplayName();
+							
+							for (final Event event : items) {								
 								DateTime start = event.getStart().getDateTime();
+								DateTime end = event.getEnd().getDateTime();								
 								if (start == null) {
 									start = event.getStart().getDate();
 								}
-								System.out.printf("%s (%s)\n", event.getSummary(), start);
+								List<DateTime> dateList = new LinkedList<DateTime>();
+								dateList.add(start);
+								dateList.add(end);
+								excelData.put(event.getSummary(), dateList);
+								System.out.printf("%s (%s)\n", event.getSummary(), start + "and end date" + end);
 							}
 						}
 					}
