@@ -24,6 +24,7 @@ public class Main {
 		createStaffAndClientRow(excelOutput,configurationFileParser);
 		createFromAndProjectsRow(excelOutput, configurationFileParser);
 		createToRow(excelOutput, configurationFileParser);
+		System.out.println();
 
 		try {
 			final FileOutputStream outputStream = new FileOutputStream(FILE_PATH);
