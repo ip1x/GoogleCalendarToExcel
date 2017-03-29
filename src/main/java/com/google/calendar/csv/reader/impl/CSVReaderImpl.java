@@ -17,6 +17,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
+import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.csv.reader.CSVReader;
 
 /**
@@ -80,7 +81,7 @@ public class CSVReaderImpl implements CSVReader {
 			while ((line = br.readLine()) != null) {
 
 				// use comma as separator
-				String[] argument = line.split(",");
+				String[] argument = line.split(CalendarConstant.COMMA_SPLITTER);
 
 				for (int j = 0; j < argument.length; j++) {
 

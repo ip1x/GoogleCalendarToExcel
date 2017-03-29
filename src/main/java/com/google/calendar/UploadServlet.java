@@ -22,6 +22,7 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.csv.reader.CSVReader;
 import com.google.calendar.excel.output.ExcelService;
 import com.google.calendar.factory.ServiceFactory;
@@ -36,6 +37,20 @@ import com.google.calendar.service.CalendarService;
  */
 public class UploadServlet extends HttpServlet {
 
+	/**
+	 * Service name constant
+	 */
+	public static String CALENDAR_SERVICE = "CalendarService";
+	/**
+	 * Reader name constant
+	 */
+	public static String CSV_READER = "CsvReader";
+	/**
+	 * Service name constant
+	 */
+	public static String EXCEL_SERVICE = "ExcelService";
+	
+	
 	
 	/**
 	 * default serial version
@@ -69,27 +84,27 @@ public class UploadServlet extends HttpServlet {
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response)
 			throws ServletException, IOException {
 
-		response.setContentType("text/html");	
-		csvReader = (CSVReader) ServiceFactory.getInstance("CsvReader");
+		response.setContentType(CalendarConstant.CONTENT_TYPE);	
+		csvReader = (CSVReader) ServiceFactory.getInstance(CSV_READER);
 		Map<String, String> inputMap = csvReader.readCSV(request);	
 
-		List calendarName = Arrays.asList(inputMap.get("CALENDAR").split(","));
-		String templatePath = inputMap.get("TEMPLATE") != null ? inputMap.get("TEMPLATE") : "Timesheet.xls";
-		String resultName = inputMap.get("OUTFILE") != null ? inputMap.get("OUTFILE") : "Results.xls";
-		String inOutPath = inputMap.get("INOUTMAP") != null ? inputMap.get("INOUTMAP") : "configuration.properties";
+		List calendarName = Arrays.asList(inputMap.get("CALENDAR").split(CalendarConstant.COMMA_SPLITTER));
+		String templatePath = inputMap.get(CalendarConstant.TEMPLATE) != null ? inputMap.get(CalendarConstant.TEMPLATE) : "Timesheet.xls";
+		String resultName = inputMap.get(CalendarConstant.OUTFILE) != null ? inputMap.get(CalendarConstant.OUTFILE) : "Results.xls";
+		String inOutPath = inputMap.get(CalendarConstant.INOUTMAP) != null ? inputMap.get(CalendarConstant.INOUTMAP) : "configuration.properties";
 
 		// optional need to check for null at the time of logic
-		List<String> projectName = inputMap.get("PROJECT") != null ? Arrays.asList(inputMap.get("PROJECT").split(",")): null;
-		List<String> clientName = inputMap.get("CLIENT") != null ? Arrays.asList(inputMap.get("CLIENT").split(",")) : null;
+		List<String> projectName = inputMap.get(CalendarConstant.PROJECT) != null ? Arrays.asList(inputMap.get(CalendarConstant.PROJECT).split(CalendarConstant.COMMA_SPLITTER)): null;
+		List<String> clientName = inputMap.get(CalendarConstant.CLIENT) != null ? Arrays.asList(inputMap.get(CalendarConstant.CLIENT).split(CalendarConstant.COMMA_SPLITTER)) : null;
 
 		//created Date format for date 201703010000
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+		SimpleDateFormat dateFormat = new SimpleDateFormat(CalendarConstant.DATE_FORMAT);
 		DateTime from = null;
 		DateTime to = null;
 		try {
-			Date fromDate = inputMap.get("FROM") != null ? dateFormat.parse(inputMap.get("FROM")) : new Date();
+			Date fromDate = inputMap.get(CalendarConstant.FROM) != null ? dateFormat.parse(inputMap.get(CalendarConstant.FROM)) : new Date();
 			@SuppressWarnings("deprecation")
-			Date toDate = inputMap.get("TO") != null ? dateFormat.parse(inputMap.get("TO"))
+			Date toDate = inputMap.get(CalendarConstant.TO) != null ? dateFormat.parse(inputMap.get(CalendarConstant.TO))
 					: new Date(fromDate.getYear(), 12, 31);
 
 			from = new DateTime(fromDate);
@@ -98,7 +113,7 @@ public class UploadServlet extends HttpServlet {
 			// Build a new authorized API client service.
 			// Note: Do not confuse this class with the
 			// com.google.api.services.calendar.model.Calendar class.
-			calendarService = (CalendarService) ServiceFactory.getInstance("CalendarService");
+			calendarService = (CalendarService) ServiceFactory.getInstance(CALENDAR_SERVICE);
 			Calendar service = calendarService.getCalendarService();
 
 			Map<String, List<DateTime>> excelData = new HashMap<String, List<DateTime>>();
@@ -112,7 +127,7 @@ public class UploadServlet extends HttpServlet {
 				for (CalendarListEntry calendarListEntry : listItems) {
 					if (calendarName.contains(calendarListEntry.getSummary())) {
 						final Events events = service.events().list(calendarListEntry.getId()).setMaxResults(100)
-								.setTimeMin(from).setOrderBy("startTime").setTimeMax(to).setSingleEvents(true)
+								.setTimeMin(from).setOrderBy(CalendarConstant.START_TIME).setTimeMax(to).setSingleEvents(true)
 								.execute();
 						final List<Event> items = events.getItems();
 						if (items.size() == 0) {
@@ -140,7 +155,7 @@ public class UploadServlet extends HttpServlet {
 				pageToken = calendarList.getNextPageToken();
 			} while (pageToken != null);
 
-			excelService = (ExcelService) ServiceFactory.getInstance("ExcelService");
+			excelService = (ExcelService) ServiceFactory.getInstance(EXCEL_SERVICE);
 		//	excelService.generateExcel(calendarName, templatePath, resultName, inOutPath,excelData);
 
 		} catch (ParseException e) {
