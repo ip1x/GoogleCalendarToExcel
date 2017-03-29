@@ -4,6 +4,10 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * @author DAMCO
+ *
+ */
 public interface CSVReader {
 
 	/**

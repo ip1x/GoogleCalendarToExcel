@@ -19,22 +19,40 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.google.calendar.csv.reader.CSVReader;
 
+/**
+ * This class will used to read the csv file and convert the csv file data into
+ * map object
+ * 
+ * @author DAMCO
+ *
+ */
 public class CSVReaderImpl implements CSVReader {
 
+	/**
+	 * maximum file size to be uploaded.
+	 */
 	private int maxFileSize = 50 * 1024;
+	
+	/**
+	 *  maximum size that will be stored in memory
+	 */
 	private int maxMemSize = 4 * 1024;
 
+	/**
+	 * 
+	 * Return Map of input parameter taken from CSV file
+	 * 
+	 * @param request
+	 *            HttpServletRequest object with form parameter
+	 * @return Map of input parameter
+	 */
 	public Map<String, String> readCSV(final HttpServletRequest request) {
 
-		DiskFileItemFactory factory = new DiskFileItemFactory();
-		// maximum size that will be stored in memory
+		DiskFileItemFactory factory = new DiskFileItemFactory();		
 		factory.setSizeThreshold(maxMemSize);
 		// Location to save data that is larger than maxMemSize.
-		factory.setRepository(new File("c:\\temp"));
-
-		// Create a new file upload handler
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		// maximum file size to be uploaded.
+		factory.setRepository(new File("c:\\temp"));		
+		ServletFileUpload upload = new ServletFileUpload(factory);		
 		upload.setSizeMax(maxFileSize);
 
 		// Create input from CSV

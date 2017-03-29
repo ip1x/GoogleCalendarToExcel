@@ -1,6 +1,4 @@
-/**
- *
- */
+
 package com.google.calendar;
 
 import java.io.IOException;
@@ -25,38 +23,54 @@ import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.calendar.csv.reader.CSVReader;
-import com.google.calendar.csv.reader.impl.CSVReaderImpl;
+import com.google.calendar.excel.output.ExcelService;
+import com.google.calendar.factory.ServiceFactory;
 import com.google.calendar.service.CalendarService;
-import com.google.calendar.service.impl.CalendarServiceImpl;
 
 /**
- * @author User
+ * Controller class to Handle incoming request with CSV file
+ * Will Read CSV file and generate Excel
+ * 
+ * @author DAMCO
  *
  */
 public class UploadServlet extends HttpServlet {
 
+	
 	/**
-	 *
+	 * default serial version
 	 */
-	private static final long serialVersionUID = 1875242968807644942L;
+	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Service class to call Google Calendar API
+	 */
 	CalendarService calendarService;
+	
+	/**
+	 * Service class to read CSV file and generate a map which will contain user input data
+	 */
 	CSVReader csvReader;
+	
+	/**
+	 * Service class to generate a excel file based on user input data and calendar service data .
+	 * 
+	 */
+	ExcelService excelService;
 
 
-	@Override
-	public void init() throws ServletException {
-		calendarService = new CalendarServiceImpl();
-		csvReader = new CSVReaderImpl();
-	}
-
+	/**
+	 * Servlet post method to handle incoming post request
+	 * 
+	 * (non-Javadoc)
+	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response)
 			throws ServletException, IOException {
 
-		response.setContentType("text/html");
-
-		
+		response.setContentType("text/html");	
+		csvReader = (CSVReader) ServiceFactory.getInstance("CsvReader");
 		Map<String, String> inputMap = csvReader.readCSV(request);	
 
 		List calendarName = Arrays.asList(inputMap.get("CALENDAR").split(","));
@@ -69,13 +83,13 @@ public class UploadServlet extends HttpServlet {
 		List<String> clientName = inputMap.get("CLIENT") != null ? Arrays.asList(inputMap.get("CLIENT").split(",")) : null;
 
 		//created Date format for date 201703010000
-		SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 		DateTime from = null;
 		DateTime to = null;
 		try {
-			Date fromDate = inputMap.get("FROM") != null ? df.parse(inputMap.get("FROM")) : new Date();
+			Date fromDate = inputMap.get("FROM") != null ? dateFormat.parse(inputMap.get("FROM")) : new Date();
 			@SuppressWarnings("deprecation")
-			Date toDate = inputMap.get("TO") != null ? df.parse(inputMap.get("TO"))
+			Date toDate = inputMap.get("TO") != null ? dateFormat.parse(inputMap.get("TO"))
 					: new Date(fromDate.getYear(), 12, 31);
 
 			from = new DateTime(fromDate);
@@ -84,6 +98,7 @@ public class UploadServlet extends HttpServlet {
 			// Build a new authorized API client service.
 			// Note: Do not confuse this class with the
 			// com.google.api.services.calendar.model.Calendar class.
+			calendarService = (CalendarService) ServiceFactory.getInstance("CalendarService");
 			Calendar service = calendarService.getCalendarService();
 
 			Map<String, List<DateTime>> excelData = new HashMap<String, List<DateTime>>();
@@ -125,6 +140,8 @@ public class UploadServlet extends HttpServlet {
 				pageToken = calendarList.getNextPageToken();
 			} while (pageToken != null);
 
+			excelService = (ExcelService) ServiceFactory.getInstance("ExcelService");
+		//	excelService.generateExcel(calendarName, templatePath, resultName, inOutPath,excelData);
 
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -133,11 +150,5 @@ public class UploadServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
-
-	@Override
-	public void destroy() {
-		// do nothing.
-	}
-
 	
 }
