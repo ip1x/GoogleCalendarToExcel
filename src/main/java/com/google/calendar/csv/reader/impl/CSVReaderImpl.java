@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,17 +61,19 @@ public class CSVReaderImpl implements CSVReader {
 		try {
 			List fileItems = upload.parseRequest(request);
 			Iterator iterator = fileItems.iterator();
-
+			InputStream inputStream=null;
 			while (iterator.hasNext()) {
 				FileItem fileItem = (FileItem) iterator.next();
 				if (!fileItem.isFormField()) {
 
-					fileItem.write(csvFile);
+					inputStream = fileItem.getInputStream();
 
+				}else {
+					throw new  FileNotFoundException();
 				}
 			}
 
-			bufferReader = new BufferedReader(new FileReader(csvFile));
+			bufferReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 			while ((line = bufferReader.readLine()) != null) {
 
 				// use ',' as separator
