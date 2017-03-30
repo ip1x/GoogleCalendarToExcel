@@ -29,15 +29,7 @@ import com.google.calendar.csv.reader.CSVReader;
  */
 public class CSVReaderImpl implements CSVReader {
 
-	/**
-	 * maximum file size to be uploaded.
-	 */
-	private int maxFileSize = 50 * 1024;
-	
-	/**
-	 *  maximum size that will be stored in memory
-	 */
-	private int maxMemSize = 4 * 1024;
+
 
 	/**
 	 * 
@@ -50,43 +42,43 @@ public class CSVReaderImpl implements CSVReader {
 	public Map<String, String> readCSV(final HttpServletRequest request) {
 
 		DiskFileItemFactory factory = new DiskFileItemFactory();		
-		factory.setSizeThreshold(maxMemSize);
+		factory.setSizeThreshold(CalendarConstant.MAXMEMSIZE);
 		// Location to save data that is larger than maxMemSize.
-		factory.setRepository(new File("c:\\temp"));		
+		factory.setRepository(new File(CalendarConstant.TEMP_STORAGE_LOCATION));		
 		ServletFileUpload upload = new ServletFileUpload(factory);		
-		upload.setSizeMax(maxFileSize);
+		upload.setSizeMax(CalendarConstant.MAXFILESIZE);
 
 		// Create input from CSV
 
-		BufferedReader br = null;
+		BufferedReader bufferReader = null;
 		String line = "";
 
 		String lastKey = "";
 		Map<String, String> inputMap = new LinkedHashMap<String, String>();
-		File csvFile = new File("C:\\test.csv");
+		File csvFile = new File(CalendarConstant.TEMP_FILE_LOCATION);
 		try {
 			List fileItems = upload.parseRequest(request);
-			Iterator i = fileItems.iterator();
+			Iterator iterator = fileItems.iterator();
 
-			while (i.hasNext()) {
-				FileItem fi = (FileItem) i.next();
-				if (!fi.isFormField()) {
+			while (iterator.hasNext()) {
+				FileItem fileItem = (FileItem) iterator.next();
+				if (!fileItem.isFormField()) {
 
-					fi.write(csvFile);
+					fileItem.write(csvFile);
 
 				}
 			}
 
-			br = new BufferedReader(new FileReader(csvFile));
-			while ((line = br.readLine()) != null) {
+			bufferReader = new BufferedReader(new FileReader(csvFile));
+			while ((line = bufferReader.readLine()) != null) {
 
-				// use comma as separator
+				// use ',' as separator
 				String[] argument = line.split(CalendarConstant.COMMA_SPLITTER);
 
 				for (int j = 0; j < argument.length; j++) {
 
 					// use : as separator
-					String[] argArray = argument[j].split(":", 2);
+					String[] argArray = argument[j].split(CalendarConstant.COL_SPLITTER, 2);
 
 					if (argArray.length == 1) {
 						inputMap.replace(lastKey.trim(), inputMap.get(lastKey).trim().concat("," + argArray[0]));
@@ -109,9 +101,9 @@ public class CSVReaderImpl implements CSVReader {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			if (br != null) {
+			if (bufferReader != null) {
 				try {
-					br.close();
+					bufferReader.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

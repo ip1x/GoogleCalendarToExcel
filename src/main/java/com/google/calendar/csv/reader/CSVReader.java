@@ -5,6 +5,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * Reader interface for CSV
+ * Will contain method to read the csv
+ * 
  * @author DAMCO
  *
  */

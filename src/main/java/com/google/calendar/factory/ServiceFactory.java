@@ -1,7 +1,10 @@
 package com.google.calendar.factory;
 
+import com.google.calendar.csv.reader.CSVReader;
 import com.google.calendar.csv.reader.impl.CSVReaderImpl;
+import com.google.calendar.excel.output.ExcelService;
 import com.google.calendar.excel.output.impl.ExcelServiceImpl;
+import com.google.calendar.service.CalendarService;
 import com.google.calendar.service.impl.CalendarServiceImpl;
 
 /**
@@ -25,13 +28,13 @@ public class ServiceFactory {
 	 * @param className
 	 * @return
 	 */
-	public static Object getInstance(String className) {
+	public static Object getInstance(Class className) {
 
-		if ("CalendarService".equalsIgnoreCase(className)) {
+		if (CalendarService.class.equals(className)) {
 			return new CalendarServiceImpl();
-		} else if ("CSVReader".equalsIgnoreCase(className)) {
+		} else if (CSVReader.class.equals(className)) {
 			return new CSVReaderImpl();
-		} else if ("ExcelService".equalsIgnoreCase(className)) {
+		} else if (ExcelService.class.equals(className)) {
 			return new ExcelServiceImpl();
 		}
 		else {
