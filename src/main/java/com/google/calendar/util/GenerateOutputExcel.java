@@ -22,13 +22,16 @@ public class GenerateOutputExcel {
 	public GenerateOutputExcel() {
 	}
 
-	public void generateExcelFile() throws Exception {
-		copyTemplateFile();
+	public void generateExcelFile(String path) throws Exception {
+		
+		
+		copyTemplateFile(path);
 		workbook = WorkbookFactory.create(new FileInputStream(DESTINATION_FILE_PATH));
 		sheet = workbook.getSheetAt(0);
 	}
 
-	private void copyTemplateFile() throws URISyntaxException, IOException {
+	private void copyTemplateFile(String path) throws URISyntaxException, IOException {
+		
 		final File newFile = new File(DESTINATION_FILE_PATH);
 		final URL url = Main.class.getClassLoader().getResource("template.xls");
 		final File templateFile = new File(url.toURI());
@@ -50,4 +53,6 @@ public class GenerateOutputExcel {
 	public void setSheet(final Sheet sheet) {
 		this.sheet = sheet;
 	}
+	
+	
 }

@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import com.google.calendar.constant.CalendarConstant;
+
 /**
  * This class will read properties file and convert it into map object
  * 
@@ -35,7 +37,7 @@ public class ConfigurationFileParser {
 	/**
 	 * Will contain all key pair.
 	 */
-	private static Map<String, String> propertyMap = new HashMap<String, String>();
+	private  Map<String, String> propertyMap = new HashMap<String, String>();
 
 	/**
 	 * Constructor which initialize the property object 
@@ -45,7 +47,7 @@ public class ConfigurationFileParser {
 	public ConfigurationFileParser(String path) {
 		try {
 			property = new Properties();
-			if(path == null || path.equals("")){
+			if(path != null && path.equals(CalendarConstant.CONFIGURATION_FILE_NAME)){
 			input = getClass().getClassLoader().getResourceAsStream(CONFIGURATIONFILENAME);
 			}else{
 				input=	new FileInputStream(new File(path));
@@ -95,4 +97,13 @@ public class ConfigurationFileParser {
 		return property;
 	}
 	
+	/**
+	 * getter 
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public Map<String, String> getPropertyMap() {
+		return propertyMap;
+	}
 }

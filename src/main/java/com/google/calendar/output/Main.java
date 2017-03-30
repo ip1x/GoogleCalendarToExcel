@@ -13,7 +13,7 @@ public class Main {
 	public static void main(final String[] args) {
 		try {
 			final GenerateOutputExcel excelOutput = new GenerateOutputExcel();
-			excelOutput.generateExcelFile();
+			//excelOutput.generateExcelFile();
 
 			final ConfigurationFileParser configurationFileParser = new ConfigurationFileParser("");
 			configurationFileParser.loadPropertyFile();

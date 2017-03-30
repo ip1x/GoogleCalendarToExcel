@@ -102,7 +102,7 @@ public class UploadServlet extends HttpServlet {
 								.setTimeMin(from).setOrderBy(CalendarConstant.START_TIME).setTimeMax(to).setSingleEvents(true)
 								.execute();
 						final List<Event> items = events.getItems();
-						if (items.size() == 0) {
+						if (items.isEmpty()) {
 							System.out.println("No upcoming events found.");
 						} else {
 							System.out.println("Upcoming events");
@@ -115,6 +115,7 @@ public class UploadServlet extends HttpServlet {
 								if (start == null) {
 									start = event.getStart().getDate();
 								}
+								//put start event date at index 0 and end date at index 1
 								List<DateTime> dateList = new LinkedList<DateTime>();
 								dateList.add(start);
 								dateList.add(end);
@@ -128,7 +129,7 @@ public class UploadServlet extends HttpServlet {
 			} while (pageToken != null);
 
 			ExcelService excelService = excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
-		//	excelService.generateExcel(calendarName, templatePath, resultName, inOutPath,excelData);
+			excelService.generateExcel(userName,projectName,clientName,calendarName, templatePath, resultName, inOutPath, excelData,fromDate,toDate);
 
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
