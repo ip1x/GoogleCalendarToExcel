@@ -39,7 +39,7 @@ public class ConfigurationFileParser {
 	/**
 	 * Constructor which initialize the property object 
 	 * 
-	 * @param path
+	 * @param path Location of configuration file
 	 */
 	public ConfigurationFileParser(String path) {
 		try {

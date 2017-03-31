@@ -17,6 +17,9 @@ public class CalendarConstant {
 	public static String RESULT_FILE_NAME = "Results.xls";
 	public static String CONFIGURATION_FILE_NAME = "configuration.properties";
 	
+	/**
+	 * Temporary file location. We can improve code quality by putting this on resource folder
+	 */
 	public static String DESTINATION_FILE_PATH = "C:\\calendar.xls";
 	
 	/**

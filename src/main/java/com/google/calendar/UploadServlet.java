@@ -114,12 +114,9 @@ public class UploadServlet extends HttpServlet {
 								.setSingleEvents(true).execute();
 						final List<Event> items = events.getItems();
 						if (items.isEmpty()) {
-							System.out.println("No upcoming events found.");
+						
 						} else {
-							System.out.println("Upcoming events");
-
 							userName = items.get(0).getCreator().getDisplayName();
-
 							for (final Event event : items) {
 								DateTime start = event.getStart().getDateTime();
 								DateTime end = event.getEnd().getDateTime();
@@ -146,7 +143,7 @@ public class UploadServlet extends HttpServlet {
 
 			File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
 			InputStream in = new FileInputStream(file);
-			
+
 			response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultName);
 			OutputStream outstream = response.getOutputStream();
 			IOUtils.copyLarge(in, outstream);
