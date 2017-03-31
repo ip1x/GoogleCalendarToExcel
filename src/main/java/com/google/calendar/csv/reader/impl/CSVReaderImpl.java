@@ -12,7 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -41,7 +43,7 @@ public class CSVReaderImpl implements CSVReader {
 	 *            HttpServletRequest object with form parameter
 	 * @return Map of input parameter
 	 */
-	public Map<String, String> readCSV(final HttpServletRequest request) {
+	public Map<String, String> readCSV(final HttpServletRequest request, HttpServletResponse response) {
 
 		DiskFileItemFactory factory = new DiskFileItemFactory();		
 		factory.setSizeThreshold(CalendarConstant.MAXMEMSIZE);
@@ -69,12 +71,12 @@ public class CSVReaderImpl implements CSVReader {
 					inputStream = fileItem.getInputStream();
 
 				}else {
-					throw new  FileNotFoundException();
+					throw new FileNotFoundException();
 				}
 			}
 
 			bufferReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-			while ((line = bufferReader.readLine()) != null) {
+			if ((line = bufferReader.readLine()) != null) {
 
 				// use ',' as separator
 				String[] argument = line.split(CalendarConstant.COMMA_SPLITTER);
@@ -92,18 +94,22 @@ public class CSVReaderImpl implements CSVReader {
 					}
 				}
 
+			}else {
+				
+				request.setAttribute("errorMessage", "Please Select a valid file");
+				request.getRequestDispatcher("/index.jsp").forward(request, response);
 			}
 
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (FileUploadException e) {
+		}  catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e.printStackTrace();			
+			 try {
+				 request.setAttribute("errorMessage", "Please Select a valid file");
+				request.getRequestDispatcher("/index.jsp").forward(request, response);
+			} catch (ServletException | IOException e1) {
+				// TODO Auto-generated catch block
+				request.setAttribute("errorMessage", "Error in loading");
+			}
 		} finally {
 			if (bufferReader != null) {
 				try {

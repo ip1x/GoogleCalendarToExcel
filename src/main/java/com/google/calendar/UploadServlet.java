@@ -1,7 +1,11 @@
 
 package com.google.calendar;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -16,6 +20,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
+
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
@@ -26,58 +32,63 @@ import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.csv.reader.CSVReader;
 import com.google.calendar.excel.output.ExcelService;
 import com.google.calendar.factory.ServiceFactory;
+import com.google.calendar.output.exception.ExcelFormatException;
 import com.google.calendar.service.CalendarService;
 
 /**
- * Controller class to Handle incoming request with CSV file
- * Will Read CSV file and generate Excel
+ * Controller class to Handle incoming request with CSV file Will Read CSV file
+ * and generate Excel
  * 
  * @author DAMCO
  *
  */
 public class UploadServlet extends HttpServlet {
 
-	
-	
-	
 	/**
 	 * default serial version
 	 */
 	private static final long serialVersionUID = 1L;
 
-
 	/**
 	 * Servlet post method to handle incoming post request
 	 * 
 	 * (non-Javadoc)
-	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 * 
+	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest,
+	 *      javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response)
 			throws ServletException, IOException {
 
-		response.setContentType(CalendarConstant.CONTENT_TYPE);	
+		response.setContentType(CalendarConstant.CONTENT_TYPE);
 		CSVReader csvReader = (CSVReader) ServiceFactory.getInstance(CSVReader.class);
-		Map<String, String> inputMap = csvReader.readCSV(request);	
+		Map<String, String> inputMap = csvReader.readCSV(request, response);
 
-		List calendarName = Arrays.asList(inputMap.get("CALENDAR").split(CalendarConstant.COMMA_SPLITTER));
-		String templatePath = inputMap.get(CalendarConstant.TEMPLATE) != null ? inputMap.get(CalendarConstant.TEMPLATE) :CalendarConstant.TEMPLATE_FILE_NAME;
-		String resultName = inputMap.get(CalendarConstant.OUTFILE) != null ? inputMap.get(CalendarConstant.OUTFILE) : CalendarConstant.RESULT_FILE_NAME;
-		String inOutPath = inputMap.get(CalendarConstant.INOUTMAP) != null ? inputMap.get(CalendarConstant.INOUTMAP) : CalendarConstant.CONFIGURATION_FILE_NAME;
+		List<String> calendarName = Arrays.asList(inputMap.get("CALENDAR").split(CalendarConstant.COMMA_SPLITTER));
+		String templatePath = inputMap.get(CalendarConstant.TEMPLATE) != null ? inputMap.get(CalendarConstant.TEMPLATE)
+				: CalendarConstant.TEMPLATE_FILE_NAME;
+		String resultName = inputMap.get(CalendarConstant.OUTFILE) != null ? inputMap.get(CalendarConstant.OUTFILE)
+				: CalendarConstant.RESULT_FILE_NAME;
+		String inOutPath = inputMap.get(CalendarConstant.INOUTMAP) != null ? inputMap.get(CalendarConstant.INOUTMAP)
+				: CalendarConstant.CONFIGURATION_FILE_NAME;
 
 		// optional need to check for null at the time of logic
-		List<String> projectName = inputMap.get(CalendarConstant.PROJECT) != null ? Arrays.asList(inputMap.get(CalendarConstant.PROJECT).split(CalendarConstant.COMMA_SPLITTER)): null;
-		List<String> clientName = inputMap.get(CalendarConstant.CLIENT) != null ? Arrays.asList(inputMap.get(CalendarConstant.CLIENT).split(CalendarConstant.COMMA_SPLITTER)) : null;
+		List<String> projectName = inputMap.get(CalendarConstant.PROJECT) != null
+				? Arrays.asList(inputMap.get(CalendarConstant.PROJECT).split(CalendarConstant.COMMA_SPLITTER)) : null;
+		List<String> clientName = inputMap.get(CalendarConstant.CLIENT) != null
+				? Arrays.asList(inputMap.get(CalendarConstant.CLIENT).split(CalendarConstant.COMMA_SPLITTER)) : null;
 
-		//created Date format for date 201703010000
+		// created Date format for date 201703010000
 		SimpleDateFormat dateFormat = new SimpleDateFormat(CalendarConstant.DATE_FORMAT);
 		DateTime from = null;
 		DateTime to = null;
 		try {
-			Date fromDate = inputMap.get(CalendarConstant.FROM) != null ? dateFormat.parse(inputMap.get(CalendarConstant.FROM)) : new Date();
+			Date fromDate = inputMap.get(CalendarConstant.FROM) != null
+					? dateFormat.parse(inputMap.get(CalendarConstant.FROM)) : new Date();
 			@SuppressWarnings("deprecation")
-			Date toDate = inputMap.get(CalendarConstant.TO) != null ? dateFormat.parse(inputMap.get(CalendarConstant.TO))
-					: new Date(fromDate.getYear(), 12, 31);
+			Date toDate = inputMap.get(CalendarConstant.TO) != null
+					? dateFormat.parse(inputMap.get(CalendarConstant.TO)) : new Date(fromDate.getYear(), 12, 31);
 
 			from = new DateTime(fromDate);
 			to = new DateTime(toDate);
@@ -91,7 +102,7 @@ public class UploadServlet extends HttpServlet {
 			Map<String, List<DateTime>> excelData = new HashMap<String, List<DateTime>>();
 			String userName = "";
 			String pageToken = null;
-			
+
 			do {
 				CalendarList calendarList = service.calendarList().list().setPageToken(pageToken).execute();
 				List<CalendarListEntry> listItems = calendarList.getItems();
@@ -99,8 +110,8 @@ public class UploadServlet extends HttpServlet {
 				for (CalendarListEntry calendarListEntry : listItems) {
 					if (calendarName.contains(calendarListEntry.getSummary())) {
 						final Events events = service.events().list(calendarListEntry.getId()).setMaxResults(100)
-								.setTimeMin(from).setOrderBy(CalendarConstant.START_TIME).setTimeMax(to).setSingleEvents(true)
-								.execute();
+								.setTimeMin(from).setOrderBy(CalendarConstant.START_TIME).setTimeMax(to)
+								.setSingleEvents(true).execute();
 						final List<Event> items = events.getItems();
 						if (items.isEmpty()) {
 							System.out.println("No upcoming events found.");
@@ -108,14 +119,15 @@ public class UploadServlet extends HttpServlet {
 							System.out.println("Upcoming events");
 
 							userName = items.get(0).getCreator().getDisplayName();
-							
-							for (final Event event : items) {								
+
+							for (final Event event : items) {
 								DateTime start = event.getStart().getDateTime();
-								DateTime end = event.getEnd().getDateTime();								
+								DateTime end = event.getEnd().getDateTime();
 								if (start == null) {
 									start = event.getStart().getDate();
 								}
-								//put start event date at index 0 and end date at index 1
+								// put start event date at index 0 and end date
+								// at index 1
 								List<DateTime> dateList = new LinkedList<DateTime>();
 								dateList.add(start);
 								dateList.add(end);
@@ -128,15 +140,47 @@ public class UploadServlet extends HttpServlet {
 				pageToken = calendarList.getNextPageToken();
 			} while (pageToken != null);
 
-			ExcelService excelService = excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
-			excelService.generateExcel(userName,projectName,clientName,calendarName, templatePath, resultName, inOutPath, excelData,fromDate,toDate);
+			ExcelService excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
+			excelService.generateExcel(userName, projectName, clientName, calendarName, templatePath, inOutPath,
+					excelData, fromDate, toDate);
+
+			File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
+			InputStream in = new FileInputStream(file);
+			
+			response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultName);
+			OutputStream outstream = response.getOutputStream();
+			IOUtils.copyLarge(in, outstream);
 
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			try {
+				request.setAttribute("errorMessage", "Error in parsing Date");
+				request.getRequestDispatcher("/index.jsp").forward(request, response);
+			} catch (ServletException | IOException e1) {
+				// TODO Auto-generated catch block
+				request.setAttribute("errorMessage", "Error in loading");
+			}
+		} catch (ExcelFormatException e) {
+			e.printStackTrace();
+			try {
+				request.setAttribute("errorMessage", "Error in reading excel File");
+				request.getRequestDispatcher("/index.jsp").forward(request, response);
+			} catch (ServletException | IOException e1) {
+				// TODO Auto-generated catch block
+				request.setAttribute("errorMessage", "Error in loading");
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
+			try {
+				request.setAttribute("errorMessage", "Error in CSV validation");
+				request.getRequestDispatcher("/index.jsp").forward(request, response);
+			} catch (ServletException | IOException e1) {
+				// TODO Auto-generated catch block
+				request.setAttribute("errorMessage", "Error in loading");
+			}
+
 		}
 	}
-	
+
 }

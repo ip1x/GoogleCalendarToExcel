@@ -15,12 +15,19 @@ public class CalendarConstant {
 	//Default file names for input parameter
 	public static String TEMPLATE_FILE_NAME = "Timesheet.xls";	
 	public static String RESULT_FILE_NAME = "Results.xls";
-	public static String CONFIGURATION_FILE_NAME = "configuration.propertie";
+	public static String CONFIGURATION_FILE_NAME = "configuration.properties";
+	
+	public static String DESTINATION_FILE_PATH = "C:\\calendar.xls";
 	
 	/**
-	 * Content type of servlet response
-	 */
-	public static String CONTENT_TYPE = "text/html";
+	  * Content type of servlet response
+	  */
+	 public static String CONTENT_TYPE = "application/vnd.ms-excel";
+	 
+	 /**
+	  * Content Header of servlet response
+	  */
+	 public static String CONTENT_HEADER = "content-disposition";
 	
 	/**
 	 * Date format used inside application

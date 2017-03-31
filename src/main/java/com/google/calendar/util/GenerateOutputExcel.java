@@ -6,35 +6,65 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-import com.google.calendar.output.Main;
+import com.google.calendar.constant.CalendarConstant;
 import com.google.common.io.Files;
 
+/**
+ * Will read excel file and create sheet for Data population.
+ * 
+ * @author DAMCO
+ *
+ */
 public class GenerateOutputExcel {
 
 	private Workbook workbook;
 	private Sheet sheet;
-	public static String DESTINATION_FILE_PATH = "Z:/calendar.xlsx";
+	
 
 	public GenerateOutputExcel() {
 	}
 
-	public void generateExcelFile(String path) throws Exception {
+	/**
+	 * 
+	 * Will read and generate excel file from specified path
+	 * 
+	 * @param path template path to read from
+	 * 
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 * @throws EncryptedDocumentException
+	 * @throws InvalidFormatException
+	 */
+	public void generateExcelFile(String path) throws URISyntaxException, IOException, EncryptedDocumentException, InvalidFormatException{
 		
 		
 		copyTemplateFile(path);
-		workbook = WorkbookFactory.create(new FileInputStream(DESTINATION_FILE_PATH));
+		workbook = WorkbookFactory.create(new FileInputStream(CalendarConstant.DESTINATION_FILE_PATH));
 		sheet = workbook.getSheetAt(0);
 	}
 
+	/**
+	 * Create a copy of excel file to write data on it.
+	 * 
+	 * @param path url
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 */
 	private void copyTemplateFile(String path) throws URISyntaxException, IOException {
-		
-		final File newFile = new File(DESTINATION_FILE_PATH);
-		final URL url = Main.class.getClassLoader().getResource("template.xls");
-		final File templateFile = new File(url.toURI());
+		 File templateFile = null;
+		if("Timesheet.xls".equalsIgnoreCase(path)){
+			final URL url = getClass().getClassLoader().getResource("Timesheet.xls");
+			 templateFile = new File(url.toURI());
+		}else {
+			 templateFile = new File(path);
+		}		
+		final File newFile = new File(CalendarConstant.DESTINATION_FILE_PATH);
 		Files.copy(templateFile, newFile);
 	}
 
@@ -53,6 +83,4 @@ public class GenerateOutputExcel {
 	public void setSheet(final Sheet sheet) {
 		this.sheet = sheet;
 	}
-	
-	
 }

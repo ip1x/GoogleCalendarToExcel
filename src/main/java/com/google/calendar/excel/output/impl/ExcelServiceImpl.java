@@ -1,15 +1,22 @@
 package com.google.calendar.excel.output.impl;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
 import com.google.api.client.util.DateTime;
 import com.google.calendar.excel.output.ExcelService;
+import com.google.calendar.output.exception.ExcelFormatException;
 import com.google.calendar.util.ConfigurationFileParser;
 import com.google.calendar.util.GenerateOutputExcel;
 
@@ -24,37 +31,49 @@ public class ExcelServiceImpl implements ExcelService {
 	final String endDate = "Ended on";
 	final String workedHours = "Worked Hours";
 
-	public void generateExcel(String userName, List<String> projectName, List<String> clientName, List calendarName, String templatePath,
-			String resultName, String inOutPath, Map<String, List<DateTime>> excelData, Date startDate, Date endDate)
-			throws Exception {
+	public void generateExcel(String userName, List<String> projectName, List<String> clientName, List calendarName,
+			String templatePath, String inOutPath, Map<String, List<DateTime>> excelData,
+			Date startDate, Date endDate) throws ExcelFormatException{
 
-		GenerateOutputExcel generateOutputExcel = new GenerateOutputExcel();
-		ConfigurationFileParser configurationFileParser = new ConfigurationFileParser(inOutPath);
+		try {
+			GenerateOutputExcel generateOutputExcel = new GenerateOutputExcel();
+			ConfigurationFileParser configurationFileParser = new ConfigurationFileParser(inOutPath);
+			Map<String, String> propertyMap = configurationFileParser.getPropertyMap();
 
-		Map<String, String> propertyMap = configurationFileParser.getPropertyMap();
-		
-		
-		
+			generateOutputExcel.generateExcelFile(templatePath);
 
-		generateOutputExcel.generateExcelFile(templatePath);
+			Sheet sheet = generateOutputExcel.getSheet();
 
-		Sheet sheet = generateOutputExcel.getSheet();
+			int columnSize = propertyMap.size() + 2;
+			int headerRow = getStartHeader(sheet, columnSize);	
+			//setHeaderValue
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			throw new ExcelFormatException();
+		} 
 
-		int columnSize = propertyMap.size() + 2;
-		int headerRow = getStartHeader(sheet, columnSize);
+	
 
-		/*
-		 * propertyMap.forEach((k,v)->{ System.out.println("Item : " + k +
-		 * " Count : " + v); //for (int i = 0; i < array.length; i++) {
-		 * 
-		 * }
-		 * 
-		 * });
-		 */
 
-		createStaffAndClientRow(generateOutputExcel, getNameAsString(clientName), resultName);
-		createFromAndProjectsRow(generateOutputExcel, getNameAsString(projectName), startDate);
-		createToRow(generateOutputExcel, endDate);
+	}
+
+	Map<String, String> getDataFromEventName(Entry<String, String> entry) {
+		Map<String, String> map = new HashMap<String, String>();
+
+		String eventData[] = ((String) entry.getKey()).split(" ");
+
+		for (String string : eventData) {
+
+			String keyValue[] = string.split(":");
+			if (keyValue != null && keyValue.length == 2) {
+				map.put(keyValue[0], keyValue[1]);
+			} else {
+				map.put(Character.toString(keyValue[0].charAt(0)), keyValue[0].substring(1, keyValue[0].length()));
+			}
+
+		}
+		return map;
 
 	}
 
@@ -65,14 +84,14 @@ public class ExcelServiceImpl implements ExcelService {
 		propertyMap.forEach((k, v) -> {
 			System.out.println("Item : " + k + " Count : " + v);
 			for (int i = 0; i < columnSize; i++) {
-				final int l=i;
+				final int l = i;
 				Cell hearderCall = header.getCell(i);
 				if (hearderCall.getStringCellValue().trim().equals(v)) {
 					for (int j = headerRow + 1; j <= lastColumnSize; j++) {
-						final int m= j;
+						final int m = j;
 						excelData.forEach((event, list) -> {
 							Row valueRow = sheet.getRow(l);
-							if(valueRow != null){
+							if (valueRow != null) {
 								Cell valueCell = valueRow.getCell(m);
 								valueCell.setCellValue(excelData.get(k));
 							}
@@ -122,39 +141,6 @@ public class ExcelServiceImpl implements ExcelService {
 		}
 	}
 
-	private String getNameAsString(List<String> clients) {
-		StringBuilder b = new StringBuilder();
-		clients.forEach(b::append);
-		return b.toString();
-	}
-
-	private void createStaffAndClientRow(final GenerateOutputExcel excelOutput, final String clientName,
-			final String userName) {
-		final Row row4 = excelOutput.getSheet().getRow(3);
-
-		final Cell staffValue = row4.getCell(1);
-		staffValue.setCellValue(userName);
-
-		final Cell clientValue = row4.getCell(6);
-		clientValue.setCellValue(clientName);
-	}
-
-	private void createFromAndProjectsRow(final GenerateOutputExcel excelOutput, final String projectNames,
-			final Date startDate) {
-		final Row row5 = excelOutput.getSheet().getRow(4);
-
-		final Cell fromValue = row5.getCell(1);
-		fromValue.setCellValue(startDate.toString());
-
-		final Cell projectsValue = row5.getCell(6);
-		projectsValue.setCellValue(projectNames);
-	}
-
-	private void createToRow(final GenerateOutputExcel excelOutput, final Date endDate) {
-		final Row row6 = excelOutput.getSheet().getRow(5);
-
-		final Cell toValue = row6.getCell(1);
-		toValue.setCellValue(endDate.toString());
-	}
+	
 
 }

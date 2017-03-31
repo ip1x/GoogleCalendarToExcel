@@ -3,6 +3,7 @@ package com.google.calendar.csv.reader;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Reader interface for CSV
@@ -21,6 +22,6 @@ public interface CSVReader {
 	 *            HttpServletRequest object with form parameter
 	 * @return Map of input parameter
 	 */
-	public Map<String, String> readCSV(final HttpServletRequest request);
+	public Map<String, String> readCSV(final HttpServletRequest request,  HttpServletResponse response);
 
 }

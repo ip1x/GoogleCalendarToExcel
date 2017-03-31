@@ -29,10 +29,7 @@ public class ConfigurationFileParser {
 	 */
 	private InputStream input = null;
 	
-	/**
-	 * Default Configuration file name
-	 */
-	private final String CONFIGURATIONFILENAME = "configuration.properties";
+
 	
 	/**
 	 * Will contain all key pair.
@@ -48,7 +45,7 @@ public class ConfigurationFileParser {
 		try {
 			property = new Properties();
 			if(path != null && path.equals(CalendarConstant.CONFIGURATION_FILE_NAME)){
-			input = getClass().getClassLoader().getResourceAsStream(CONFIGURATIONFILENAME);
+			input = getClass().getClassLoader().getResourceAsStream(CalendarConstant.CONFIGURATION_FILE_NAME);
 			}else{
 				input=	new FileInputStream(new File(path));
 			}
