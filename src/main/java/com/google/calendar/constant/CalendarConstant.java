@@ -1,5 +1,8 @@
 package com.google.calendar.constant;
 
+import java.text.Format;
+import java.text.SimpleDateFormat;
+
 public class CalendarConstant {
 	
 	//CSV file field
@@ -16,6 +19,8 @@ public class CalendarConstant {
 	public static String TEMPLATE_FILE_NAME = "Timesheet.xls";	
 	public static String RESULT_FILE_NAME = "Results.xls";
 	public static String CONFIGURATION_FILE_NAME = "configuration.properties";
+	
+	static public  Format df = new SimpleDateFormat("MM/dd/yyyy");
 	
 	/**
 	 * Temporary file location. We can improve code quality by putting this on resource folder
