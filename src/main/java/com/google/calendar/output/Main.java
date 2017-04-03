@@ -22,7 +22,7 @@ import com.google.calendar.util.GenerateOutputExcel;
 public class Main {
 
 	public static void main(final String[] args) {
-		try {
+		try {/*
 			
 			
 			GenerateOutputExcel generateOutputExcel = new GenerateOutputExcel();
@@ -80,7 +80,7 @@ public class Main {
 			
 
 		
-		} catch (final Exception e) {
+		*/} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
