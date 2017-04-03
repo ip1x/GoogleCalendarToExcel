@@ -24,9 +24,9 @@
 <body>
 
 <div class="container" style="margin-top:100px">
-  <div class="jumbotron alignCenter">
+  <div class="jumbotron alignCenter" style="background-color:7C7B20">
     
-  <h2>Heading</h2>
+  <h2>Gcalendar2XLS</h2>
   <p><form action="/GoogleCalendarToExcel/csv" method="post" enctype="multipart/form-data">
         <div style="color: #FF0000;">${errorMessage}</div>
 		<input id="data" type="file" name="file" size="50" class="inputAlign" /> <br /> 

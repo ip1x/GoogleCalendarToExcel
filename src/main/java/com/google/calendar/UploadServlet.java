@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -75,9 +76,10 @@ public class UploadServlet extends HttpServlet {
 
 		// optional need to check for null at the time of logic
 		List<String> projectName = inputMap.get(CalendarConstant.PROJECT) != null
-				? Arrays.asList(inputMap.get(CalendarConstant.PROJECT).split(CalendarConstant.COMMA_SPLITTER)) : null;
+				? Arrays.asList(inputMap.get(CalendarConstant.PROJECT).split(CalendarConstant.COMMA_SPLITTER)) :  new ArrayList<>();
 		List<String> clientName = inputMap.get(CalendarConstant.CLIENT) != null
-				? Arrays.asList(inputMap.get(CalendarConstant.CLIENT).split(CalendarConstant.COMMA_SPLITTER)) : null;
+				? Arrays.asList(inputMap.get(CalendarConstant.CLIENT).split(CalendarConstant.COMMA_SPLITTER))
+				: new ArrayList<>();
 
 		// created Date format for date 201703010000
 		SimpleDateFormat dateFormat = new SimpleDateFormat(CalendarConstant.DATE_FORMAT);
@@ -114,22 +116,27 @@ public class UploadServlet extends HttpServlet {
 								.setSingleEvents(true).execute();
 						final List<Event> items = events.getItems();
 						if (items.isEmpty()) {
-						
+
 						} else {
 							userName = items.get(0).getCreator().getDisplayName();
 							for (final Event event : items) {
-								DateTime start = event.getStart().getDateTime();
-								DateTime end = event.getEnd().getDateTime();
-								if (start == null) {
-									start = event.getStart().getDate();
+								if ((clientName.contains(getProjecAndClienttName(event.getSummary()).get("CLI").trim()) || clientName.isEmpty() )
+										&&( projectName
+												.contains(getProjecAndClienttName(event.getSummary()).get("PRJ").trim())) ||  projectName.isEmpty() ) {
+									DateTime start = event.getStart().getDateTime();
+									DateTime end = event.getEnd().getDateTime();
+									if (start == null) {
+										start = event.getStart().getDate();
+									}
+									// put start event date at index 0 and end
+									// date
+									// at index 1
+									List<DateTime> dateList = new LinkedList<DateTime>();
+									dateList.add(start);
+									dateList.add(end);
+									excelData.put(event.getSummary(), dateList);
+									System.out.printf("%s (%s)\n", event.getSummary(), start + "and end date" + end);
 								}
-								// put start event date at index 0 and end date
-								// at index 1
-								List<DateTime> dateList = new LinkedList<DateTime>();
-								dateList.add(start);
-								dateList.add(end);
-								excelData.put(event.getSummary(), dateList);
-								System.out.printf("%s (%s)\n", event.getSummary(), start + "and end date" + end);
 							}
 						}
 					}
@@ -138,8 +145,8 @@ public class UploadServlet extends HttpServlet {
 			} while (pageToken != null);
 
 			ExcelService excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
-			excelService.generateExcel(userName, projectName, clientName, calendarName, templatePath, inOutPath,
-					excelData, fromDate, toDate);
+			excelService.generateExcel(userName, projectName, clientName, templatePath, inOutPath, excelData, fromDate,
+					toDate);
 
 			File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
 			InputStream in = new FileInputStream(file);
@@ -178,6 +185,25 @@ public class UploadServlet extends HttpServlet {
 			}
 
 		}
+	}
+
+	private Map<String, String> getProjecAndClienttName(String summary) {
+
+		Map<String, String> map = new HashMap<String, String>();
+		String eventData[] = summary.split(" ");
+
+		StringBuffer actStringPart = new StringBuffer("");
+		for (String string : eventData) {
+
+			String keyValue[] = string.split(":");
+			if (keyValue != null && keyValue.length == 2) {
+				map.put(keyValue[0].trim(), keyValue[1].trim());
+			} else {
+
+			}
+
+		}
+		return map;
 	}
 
 }
