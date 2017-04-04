@@ -151,7 +151,7 @@ public class UploadServlet extends HttpServlet {
 
 			List<Date> dateList = new LinkedList<>();
 			dateList.add(fromDate);
-			dateList.add(fromDate);
+			dateList.add(toDate);
 			ExcelService excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
 			excelService.generateExcel(userName, projectName, clientName, templatePath, inOutPath, excelData, dateList);
 

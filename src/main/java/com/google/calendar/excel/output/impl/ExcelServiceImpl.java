@@ -2,6 +2,7 @@ package com.google.calendar.excel.output.impl;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -79,9 +80,7 @@ public class ExcelServiceImpl implements ExcelService {
 			// Row number of table header
 			int headerRow = getStartHeader(sheet, columnSize);
 
-			// basic details of sheet
-			setHeaderValue(sheet, getNameAsString(clientName), userName, getNameAsString(projectName), dateList.get(0),
-					dateList.get(1), headerRow, columnSize);
+			
 
 			Map<String, Map<String, String>> eventKeyValue = new HashMap<>();
 			for (Map.Entry<String, List<DateTime>> entry : excelData.entrySet()) {
@@ -89,6 +88,10 @@ public class ExcelServiceImpl implements ExcelService {
 				eventKeyValue.put(entry.getKey(), eventDetails);
 
 			}
+			
+			// basic details of sheet
+			setHeaderValue(sheet, getValueFromKeyAsString(eventKeyValue,"CLI"), userName, getValueFromKeyAsString(eventKeyValue,"PRJ"), dateList.get(0),
+								dateList.get(1), headerRow, columnSize);
 			
 			//populate excel table with event details
 			setColumnsValue(sheet,columnSize,headerRow,eventKeyValue,propertyMap);
@@ -307,8 +310,14 @@ public class ExcelServiceImpl implements ExcelService {
 	 * @param clients
 	 * @return
 	 */
-	private String getNameAsString(List<String> list) {		
+	private String getValueFromKeyAsString(Map<String, Map<String, String>> keyValue , String name) {	
+		
+		List<String> list = new ArrayList<>();
+		for(Entry e : keyValue.entrySet()){
+			list.add( (( Map<String, String>)e.getValue()).get(name.trim()));
+		}
 		return Joiner.on(",").join(list);
 	}
+
 
 }
