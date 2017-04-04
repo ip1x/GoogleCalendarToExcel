@@ -28,6 +28,7 @@ public class GenerateOutputExcel {
 	
 
 	public GenerateOutputExcel() {
+		//default constructor
 	}
 
 	/**
@@ -57,7 +58,7 @@ public class GenerateOutputExcel {
 	 * @throws IOException
 	 */
 	private void copyTemplateFile(String path) throws URISyntaxException, IOException {
-		 File templateFile = null;
+		 File templateFile ;
 		if("Timesheet.xls".equalsIgnoreCase(path)){
 			final URL url = getClass().getClassLoader().getResource("Timesheet.xls");
 			 templateFile = new File(url.toURI());

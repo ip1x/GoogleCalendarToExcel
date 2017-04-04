@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -49,6 +50,9 @@ public class UploadServlet extends HttpServlet {
 	 * default serial version
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	
+	public final Logger logger = Logger.getLogger(UploadServlet.class);
 
 	/**
 	 * Servlet post method to handle incoming post request
@@ -81,6 +85,7 @@ public class UploadServlet extends HttpServlet {
 				? Arrays.asList(inputMap.get(CalendarConstant.CLIENT).split(CalendarConstant.COMMA_SPLITTER))
 				: new ArrayList<>();
 
+				InputStream inputStream = null;
 		// created Date format for date 201703010000
 		SimpleDateFormat dateFormat = new SimpleDateFormat(CalendarConstant.DATE_FORMAT);
 		DateTime from = null;
@@ -101,7 +106,7 @@ public class UploadServlet extends HttpServlet {
 			CalendarService calendarService = (CalendarService) ServiceFactory.getInstance(CalendarService.class);
 			Calendar service = calendarService.getCalendarService();
 
-			Map<String, List<DateTime>> excelData = new HashMap<String, List<DateTime>>();
+			Map<String, List<DateTime>> excelData = new HashMap<>();
 			String userName = "";
 			String pageToken = null;
 
@@ -131,11 +136,11 @@ public class UploadServlet extends HttpServlet {
 									// put start event date at index 0 and end
 									// date
 									// at index 1
-									List<DateTime> dateList = new LinkedList<DateTime>();
+									List<DateTime> dateList = new LinkedList<>();
 									dateList.add(start);
 									dateList.add(end);
 									excelData.put(event.getSummary(), dateList);
-									System.out.printf("%s (%s)\n", event.getSummary(), start + "and end date" + end);
+									
 								}
 							}
 						}
@@ -144,64 +149,65 @@ public class UploadServlet extends HttpServlet {
 				pageToken = calendarList.getNextPageToken();
 			} while (pageToken != null);
 
+			List<Date> dateList = new LinkedList<>();
+			dateList.add(fromDate);
+			dateList.add(fromDate);
 			ExcelService excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
-			excelService.generateExcel(userName, projectName, clientName, templatePath, inOutPath, excelData, fromDate,
-					toDate);
+			excelService.generateExcel(userName, projectName, clientName, templatePath, inOutPath, excelData, dateList);
 
 			File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
-			InputStream in = new FileInputStream(file);
+			inputStream = new FileInputStream(file);
 
 			response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultName);
 			OutputStream outstream = response.getOutputStream();
-			IOUtils.copyLarge(in, outstream);
+			IOUtils.copyLarge(inputStream, outstream);
 
 		} catch (ParseException e) {
-			e.printStackTrace();
+			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
 			try {
-				request.setAttribute("errorMessage", "Error in parsing Date");
-				request.getRequestDispatcher("/index.jsp").forward(request, response);
-			} catch (ServletException | IOException e1) {
-				// TODO Auto-generated catch block
-				request.setAttribute("errorMessage", "Error in loading");
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_PARSING_DATE);
+				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+			} catch (ServletException | IOException e1) {				
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
 			}
 		} catch (ExcelFormatException e) {
-			e.printStackTrace();
+			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
 			try {
-				request.setAttribute("errorMessage", "Error in reading excel File");
-				request.getRequestDispatcher("/index.jsp").forward(request, response);
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE,  CalendarConstant.ERROR_IN_READING_EXCEL);
+				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
 			} catch (ServletException | IOException e1) {
-				// TODO Auto-generated catch block
-				request.setAttribute("errorMessage", "Error in loading");
+				logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e1);
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
+			
 			try {
-				request.setAttribute("errorMessage", "Error in CSV validation");
-				request.getRequestDispatcher("/index.jsp").forward(request, response);
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE,  CalendarConstant.ERROR_IN_SCV_VALIDATION);
+				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
 			} catch (ServletException | IOException e1) {
-				// TODO Auto-generated catch block
-				request.setAttribute("errorMessage", "Error in loading");
+				logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e1);
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
 			}
 
+		}
+		finally {
+			if(inputStream != null)
+			inputStream.close();
 		}
 	}
 
 	private Map<String, String> getProjecAndClienttName(String summary) {
 
-		Map<String, String> map = new HashMap<String, String>();
-		String eventData[] = summary.split(" ");
-
-		StringBuffer actStringPart = new StringBuffer("");
+		Map<String, String> map = new HashMap<>();
+		String[] eventData = summary.split(" ");	
 		for (String string : eventData) {
 
-			String keyValue[] = string.split(":");
+			String[] keyValue = string.split(":");
 			if (keyValue != null && keyValue.length == 2) {
 				map.put(keyValue[0].trim(), keyValue[1].trim());
-			} else {
-
 			}
-
 		}
 		return map;
 	}

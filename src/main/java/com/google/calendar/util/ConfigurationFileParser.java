@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
+import com.google.calendar.UploadServlet;
 import com.google.calendar.constant.CalendarConstant;
 
 /**
@@ -29,12 +32,14 @@ public class ConfigurationFileParser {
 	 */
 	private InputStream input = null;
 	
+	public final Logger logger = Logger.getLogger(ConfigurationFileParser.class);
+	
 
 	
 	/**
 	 * Will contain all key pair.
 	 */
-	private  Map<String, String> propertyMap = new HashMap<String, String>();
+	private  Map<String, String> propertyMap = new HashMap<>();
 
 	/**
 	 * Constructor which initialize the property object 
@@ -51,8 +56,7 @@ public class ConfigurationFileParser {
 			}
 			loadPropertyFile();
 		} catch (Exception e) {
-			System.out.println("Error in reading properties file");
-			e.printStackTrace();
+			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
 		}
 	}
 
@@ -69,9 +73,7 @@ public class ConfigurationFileParser {
 				propertyMap.put(key, value);
 			}
 		} catch (final IOException e) {
-			System.out.println("Error in parsing properties file");
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
 		}
 	}
 

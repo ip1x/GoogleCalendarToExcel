@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.log4j.Logger;
 
 import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.csv.reader.CSVReader;
@@ -31,6 +32,7 @@ import com.google.calendar.csv.reader.CSVReader;
  */
 public class CSVReaderImpl implements CSVReader {
 
+	public final Logger logger = Logger.getLogger(CSVReaderImpl.class);
 
 
 	/**
@@ -56,7 +58,7 @@ public class CSVReaderImpl implements CSVReader {
 		String line = "";
 
 		String lastKey = "";
-		Map<String, String> inputMap = new LinkedHashMap<String, String>();
+		Map<String, String> inputMap = new LinkedHashMap<>();
 		File csvFile = new File(CalendarConstant.TEMP_FILE_LOCATION);
 		try {
 			List fileItems = upload.parseRequest(request);
@@ -94,26 +96,26 @@ public class CSVReaderImpl implements CSVReader {
 
 			}else {
 				
-				request.setAttribute("errorMessage", "Please Select a valid file");
-				request.getRequestDispatcher("/index.jsp").forward(request, response);
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
+				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
 			}
 
 		}  catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();			
+			
+			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);		
 			 try {
-				 request.setAttribute("errorMessage", "Please Select a valid file");
-				request.getRequestDispatcher("/index.jsp").forward(request, response);
+				 request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
+				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
 			} catch (ServletException | IOException e1) {
-				// TODO Auto-generated catch block
-				request.setAttribute("errorMessage", "Error in loading");
+				logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e1);
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
 			}
 		} finally {
 			if (bufferReader != null) {
 				try {
 					bufferReader.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
 				}
 			}
 		}

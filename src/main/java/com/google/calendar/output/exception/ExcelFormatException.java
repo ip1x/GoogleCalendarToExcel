@@ -17,11 +17,7 @@ public class ExcelFormatException extends Exception {
 		super();
 	}
 	
-	@Override
-	public String getMessage() {
-		// TODO Auto-generated method stub
-		return super.getMessage();
-	}
+	
 	
 
 }

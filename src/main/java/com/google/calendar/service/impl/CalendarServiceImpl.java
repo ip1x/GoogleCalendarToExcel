@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -19,6 +21,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.service.CalendarService;
 
 public class CalendarServiceImpl implements CalendarService {
@@ -38,6 +41,8 @@ public class CalendarServiceImpl implements CalendarService {
 
 	/** Global instance of the HTTP transport. */
 	private static HttpTransport HTTP_TRANSPORT;
+	
+	public final Logger logger = Logger.getLogger(CalendarServiceImpl.class);
 
 	/**
 	 * Global instance of the scopes required by this quickstart.
@@ -54,9 +59,8 @@ public class CalendarServiceImpl implements CalendarService {
 		try {
 			HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 			DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
-		} catch (final Throwable t) {
-			System.out.println("Error in creating trnsport protocol");
-			t.printStackTrace();
+		} catch (final Exception t) {			
+			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , t);
 			System.exit(1);
 		}
 	}
@@ -89,16 +93,15 @@ public class CalendarServiceImpl implements CalendarService {
 			final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
 					JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY)
 							.setAccessType("offline").build();
-			final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
+			return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
 					.authorize("user");
-			System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
-			return credential;
+			
+			
 		} catch (Exception e) {
-			System.out.println("Error in client credential parsing");
-			e.printStackTrace();
+			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
 
 		}
 		return null;
 	}
-
+	
 }
