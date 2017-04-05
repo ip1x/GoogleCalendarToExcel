@@ -104,7 +104,7 @@ public class UploadServlet extends HttpServlet {
 			// Note: Do not confuse this class with the
 			// com.google.api.services.calendar.model.Calendar class.
 			CalendarService calendarService = (CalendarService) ServiceFactory.getInstance(CalendarService.class);
-			Calendar service = calendarService.getCalendarService();
+			Calendar service = calendarService.getCalendarService(request,response);
 
 			Map<String, List<DateTime>> excelData = new HashMap<>();
 			String userName = "";

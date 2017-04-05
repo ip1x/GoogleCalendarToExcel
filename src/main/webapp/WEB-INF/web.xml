@@ -5,7 +5,7 @@
  
  <servlet>
   <servlet-name>Upload</servlet-name>
-  <servlet-class>com.google.calendar.UploadServlet</servlet-class>
+  <servlet-class>com.google.calendar.controller.UploadServlet</servlet-class>
  </servlet>
  
  <servlet-mapping>

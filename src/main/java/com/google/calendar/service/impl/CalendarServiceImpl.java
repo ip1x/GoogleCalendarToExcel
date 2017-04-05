@@ -7,6 +7,10 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -71,8 +75,8 @@ public class CalendarServiceImpl implements CalendarService {
 	 * @return an authorized Calendar client service
 	 * @throws IOException
 	 */
-	public Calendar getCalendarService() throws IOException {
-		final Credential credential = authorize();
+	public Calendar getCalendarService(HttpServletRequest request, final HttpServletResponse response) throws IOException {
+		final Credential credential = authorize(request,response);
 		return new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
 				.setApplicationName(APPLICATION_NAME).build();
 	}
@@ -83,7 +87,7 @@ public class CalendarServiceImpl implements CalendarService {
 	 * @return an authorized Credential object.
 	 * @throws IOException
 	 */
-	public Credential authorize() {
+	public Credential authorize(HttpServletRequest request, final HttpServletResponse response) {
 		try {	
 			// Load client secrets.
 			InputStream in = getClass().getClassLoader().getResourceAsStream("client_secret.json");
@@ -99,6 +103,14 @@ public class CalendarServiceImpl implements CalendarService {
 			
 		} catch (Exception e) {
 			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
+			try {
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_GOOGLE_AUTHENTICATION);
+				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+			} catch (ServletException | IOException e1) {	
+				logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e1);
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
+				
+			}
 
 		}
 		return null;

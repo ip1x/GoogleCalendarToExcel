@@ -2,6 +2,9 @@ package com.google.calendar.service;
 
 import java.io.IOException;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.google.api.services.calendar.Calendar;
 
 /**
@@ -19,6 +22,6 @@ public interface CalendarService {
 	 * @return Calendar Calendar object with event details
 	 * @throws IOException
 	 */
-	public Calendar getCalendarService() throws IOException;
+	public Calendar getCalendarService(HttpServletRequest request, final HttpServletResponse response) throws IOException;
 
 }

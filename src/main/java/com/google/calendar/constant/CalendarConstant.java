@@ -73,7 +73,7 @@ public class CalendarConstant {
 
 	// error messages
 
-	public static final String LOGGER_DEFAULT_MESSAGE = "Error due : ";
+	public static final String LOGGER_DEFAULT_MESSAGE = "Error due to : ";
 
 	public static final String ERROR_MESSAGE = "errorMessage";
 	public static final String HOME_PAGE = "/index.jsp";
@@ -83,6 +83,7 @@ public class CalendarConstant {
 	
 	public static final String ERROR_IN_SCV_VALIDATION = "Error in CSV validation";
 	public static final String ERROR_IN_FILE_SELECTION = "Please Select a valid file";
+	public static final String ERROR_IN_GOOGLE_AUTHENTICATION = "Google Authentication failed. Kindly provide valid json file";
 	
 
 }
