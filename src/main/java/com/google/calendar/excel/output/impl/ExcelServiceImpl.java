@@ -19,7 +19,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import com.google.api.client.util.DateTime;
 import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.excel.output.ExcelService;
-import com.google.calendar.output.exception.ExcelFormatException;
+import com.google.calendar.exception.ExcelFormatException;
 import com.google.calendar.util.ConfigurationFileParser;
 import com.google.calendar.util.GenerateOutputExcel;
 import com.google.common.base.Joiner;

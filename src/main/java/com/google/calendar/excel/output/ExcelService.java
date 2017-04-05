@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.api.client.util.DateTime;
-import com.google.calendar.output.exception.ExcelFormatException;
+import com.google.calendar.exception.ExcelFormatException;
 
 /**
  * This interface provide method to generate excel file with event details

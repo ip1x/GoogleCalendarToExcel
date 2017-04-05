@@ -11,8 +11,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.google.calendar.UploadServlet;
 import com.google.calendar.constant.CalendarConstant;
+import com.google.calendar.controller.UploadServlet;
 
 /**
  * This class will read properties file and convert it into map object

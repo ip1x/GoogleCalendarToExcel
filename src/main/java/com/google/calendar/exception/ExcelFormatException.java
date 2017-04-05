@@ -1,4 +1,4 @@
-package com.google.calendar.output.exception;
+package com.google.calendar.exception;
 
 /**
  * 
