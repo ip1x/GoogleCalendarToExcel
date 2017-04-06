@@ -17,71 +17,71 @@ import com.google.common.io.Files;
 
 /**
  * Will read excel file and create sheet for Data population.
- * 
- * @author DAMCO
  *
+ * @author DAMCO
  */
 public class GenerateOutputExcel {
 
-	private Workbook workbook;
-	private Sheet sheet;
-	
+    private Workbook workbook;
 
-	public GenerateOutputExcel() {
-		//default constructor
-	}
+    private Sheet sheet;
 
-	/**
-	 * 
-	 * Will read and generate excel file from specified path
-	 * 
-	 * @param path template path to read from
-	 * 
-	 * @throws URISyntaxException
-	 * @throws IOException
-	 * @throws EncryptedDocumentException
-	 * @throws InvalidFormatException
-	 */
-	public void generateExcelFile(String path) throws URISyntaxException, IOException, EncryptedDocumentException, InvalidFormatException{
-		
-		
-		copyTemplateFile(path);
-		workbook = WorkbookFactory.create(new FileInputStream(CalendarConstant.DESTINATION_FILE_PATH));
-		sheet = workbook.getSheetAt(0);
-	}
+    public GenerateOutputExcel() {
+        // default constructor
+    }
 
-	/**
-	 * Create a copy of excel file to write data on it.
-	 * 
-	 * @param path url
-	 * @throws URISyntaxException
-	 * @throws IOException
-	 */
-	private void copyTemplateFile(String path) throws URISyntaxException, IOException {
-		 File templateFile ;
-		if("Timesheet.xls".equalsIgnoreCase(path)){
-			final URL url = getClass().getClassLoader().getResource("Timesheet.xls");
-			 templateFile = new File(url.toURI());
-		}else {
-			 templateFile = new File(path);
-		}		
-		final File newFile = new File(CalendarConstant.DESTINATION_FILE_PATH);
-		Files.copy(templateFile, newFile);
-	}
+    /**
+     * Will read and generate excel file from specified path
+     *
+     * @param path template path to read from
+     * @throws URISyntaxException
+     * @throws IOException
+     * @throws EncryptedDocumentException
+     * @throws InvalidFormatException
+     */
+    public void generateExcelFile(final String path) throws URISyntaxException,
+            IOException, EncryptedDocumentException, InvalidFormatException {
 
-	public Workbook getWorkbook() {
-		return workbook;
-	}
+        copyTemplateFile(path);
+        workbook = WorkbookFactory.create(
+                new FileInputStream(CalendarConstant.DESTINATION_FILE_PATH));
+        sheet = workbook.getSheetAt(0);
+    }
 
-	public void setWorkbook(final Workbook workbook) {
-		this.workbook = workbook;
-	}
+    /**
+     * Create a copy of excel file to write data on it.
+     *
+     * @param path url
+     * @throws URISyntaxException
+     * @throws IOException
+     */
+    private void copyTemplateFile(final String path)
+            throws URISyntaxException, IOException {
+        File templateFile;
+        if ("Timesheet.xls".equalsIgnoreCase(path)) {
+            final URL url =
+                    getClass().getClassLoader().getResource("Timesheet.xls");
+            templateFile = new File(url.toURI());
+        } else {
+            templateFile = new File(path);
+        }
+        final File newFile = new File(CalendarConstant.DESTINATION_FILE_PATH);
+        Files.copy(templateFile, newFile);
+    }
 
-	public Sheet getSheet() {
-		return sheet;
-	}
+    public Workbook getWorkbook() {
+        return workbook;
+    }
 
-	public void setSheet(final Sheet sheet) {
-		this.sheet = sheet;
-	}
+    public void setWorkbook(final Workbook workbook) {
+        this.workbook = workbook;
+    }
+
+    public Sheet getSheet() {
+        return sheet;
+    }
+
+    public void setSheet(final Sheet sheet) {
+        this.sheet = sheet;
+    }
 }

@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
@@ -38,178 +39,221 @@ import com.google.calendar.factory.ServiceFactory;
 import com.google.calendar.service.CalendarService;
 
 /**
- * Controller class to Handle incoming request with CSV file Will Read CSV file
- * and generate Excel
+ * Controller class to Handle incoming request. This servlet reads CSV file as
+ * input,process google calender's events and and generate Excel
  * 
  * @author DAMCO
- *
  */
 public class UploadServlet extends HttpServlet {
 
-	/**
-	 * default serial version
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	
-	public final Logger logger = Logger.getLogger(UploadServlet.class);
+    /**
+     * default serial version
+     */
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Servlet post method to handle incoming post request
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	public void doPost(final HttpServletRequest request, final HttpServletResponse response)
-			throws ServletException, IOException {
+    public final Logger logger = Logger.getLogger(UploadServlet.class);
 
-		response.setContentType(CalendarConstant.CONTENT_TYPE);
-		CSVReader csvReader = (CSVReader) ServiceFactory.getInstance(CSVReader.class);
-		Map<String, String> inputMap = csvReader.readCSV(request, response);
+    /**
+     * Servlet post method to handle incoming post request (non-Javadoc)
+     * 
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest,
+     *      javax.servlet.http.HttpServletResponse)
+     */
+    @Override
+    public void doPost(final HttpServletRequest request,
+            final HttpServletResponse response)
+            throws ServletException, IOException {
 
-		List<String> calendarName = Arrays.asList(inputMap.get("CALENDAR").split(CalendarConstant.COMMA_SPLITTER));
-		String templatePath = inputMap.get(CalendarConstant.TEMPLATE) != null ? inputMap.get(CalendarConstant.TEMPLATE)
-				: CalendarConstant.TEMPLATE_FILE_NAME;
-		String resultName = inputMap.get(CalendarConstant.OUTFILE) != null ? inputMap.get(CalendarConstant.OUTFILE)
-				: CalendarConstant.RESULT_FILE_NAME;
-		String inOutPath = inputMap.get(CalendarConstant.INOUTMAP) != null ? inputMap.get(CalendarConstant.INOUTMAP)
-				: CalendarConstant.CONFIGURATION_FILE_NAME;
+        response.setContentType(CalendarConstant.CONTENT_TYPE);
+        CSVReader csvReader =
+                (CSVReader) ServiceFactory.getInstance(CSVReader.class);
+        Map<String, String> inputMap = csvReader.readCSV(request, response);
 
-		// optional need to check for null at the time of logic
-		List<String> projectName = inputMap.get(CalendarConstant.PROJECT) != null
-				? Arrays.asList(inputMap.get(CalendarConstant.PROJECT).split(CalendarConstant.COMMA_SPLITTER)) :  new ArrayList<>();
-		List<String> clientName = inputMap.get(CalendarConstant.CLIENT) != null
-				? Arrays.asList(inputMap.get(CalendarConstant.CLIENT).split(CalendarConstant.COMMA_SPLITTER))
-				: new ArrayList<>();
+        List<String> calendarName = Arrays.asList(inputMap.get(CalendarConstant.CALENDAR)
+                .split(CalendarConstant.COMMA_SPLITTER));
+        String templatePath = inputMap.get(CalendarConstant.TEMPLATE) != null
+                ? inputMap.get(CalendarConstant.TEMPLATE)
+                : CalendarConstant.TEMPLATE_FILE_NAME;
+        String resultName = inputMap.get(CalendarConstant.OUTFILE) != null
+                ? inputMap.get(CalendarConstant.OUTFILE)
+                : CalendarConstant.RESULT_FILE_NAME;
+        String inOutPath = inputMap.get(CalendarConstant.INOUTMAP) != null
+                ? inputMap.get(CalendarConstant.INOUTMAP)
+                : CalendarConstant.CONFIGURATION_FILE_NAME;
 
-				InputStream inputStream = null;
-		// created Date format for date 201703010000
-		SimpleDateFormat dateFormat = new SimpleDateFormat(CalendarConstant.DATE_FORMAT);
-		DateTime from = null;
-		DateTime to = null;
-		try {
-			Date fromDate = inputMap.get(CalendarConstant.FROM) != null
-					? dateFormat.parse(inputMap.get(CalendarConstant.FROM)) : new Date();
-			@SuppressWarnings("deprecation")
-			Date toDate = inputMap.get(CalendarConstant.TO) != null
-					? dateFormat.parse(inputMap.get(CalendarConstant.TO)) : new Date(fromDate.getYear(), 12, 31);
+        // optional need to check for null at the time of logic
+        List<String> projectName =
+                inputMap.get(CalendarConstant.PROJECT) != null
+                        ? Arrays.asList(inputMap.get(CalendarConstant.PROJECT)
+                                .split(CalendarConstant.COMMA_SPLITTER))
+                        : new ArrayList<>();
+        List<String> clientName = inputMap.get(CalendarConstant.CLIENT) != null
+                ? Arrays.asList(inputMap.get(CalendarConstant.CLIENT)
+                        .split(CalendarConstant.COMMA_SPLITTER))
+                : new ArrayList<>();
 
-			from = new DateTime(fromDate);
-			to = new DateTime(toDate);
+        InputStream inputStream = null;
+        // created Date format for date 201703010000
+        SimpleDateFormat dateFormat =
+                new SimpleDateFormat(CalendarConstant.DATE_FORMAT);
+        DateTime from = null;
+        DateTime to = null;
+        try {
+            
+            
+            Date fromDate = inputMap.get(CalendarConstant.FROM) != null
+                    ? dateFormat.parse(inputMap.get(CalendarConstant.FROM))
+                    : new Date();
+            @SuppressWarnings("deprecation")
+            Date toDate = inputMap.get(CalendarConstant.TO) != null
+                    ? dateFormat.parse(inputMap.get(CalendarConstant.TO))
+                    : new Date(fromDate.getYear(), 12, 31);
 
-			// Build a new authorized API client service.
-			// Note: Do not confuse this class with the
-			// com.google.api.services.calendar.model.Calendar class.
-			CalendarService calendarService = (CalendarService) ServiceFactory.getInstance(CalendarService.class);
-			Calendar service = calendarService.getCalendarService(request,response);
+            from = new DateTime(fromDate);
+            to = new DateTime(toDate);
 
-			Map<String, List<DateTime>> excelData = new HashMap<>();
-			String userName = "";
-			String pageToken = null;
+            // Build a new authorized API client service.
+            // Note: Do not confuse this class with the
+            // com.google.api.services.calendar.model.Calendar class.
+            CalendarService calendarService = (CalendarService) ServiceFactory
+                    .getInstance(CalendarService.class);
+            Calendar service =
+                    calendarService.getCalendarService(request, response);
 
-			do {
-				CalendarList calendarList = service.calendarList().list().setPageToken(pageToken).execute();
-				List<CalendarListEntry> listItems = calendarList.getItems();
+            Map<String, List<DateTime>> excelData = new HashMap<>();
+            String userName = "";
+            String pageToken = null;
 
-				for (CalendarListEntry calendarListEntry : listItems) {
-					if (calendarName.contains(calendarListEntry.getSummary())) {
-						final Events events = service.events().list(calendarListEntry.getId()).setMaxResults(100)
-								.setTimeMin(from).setOrderBy(CalendarConstant.START_TIME).setTimeMax(to)
-								.setSingleEvents(true).execute();
-						final List<Event> items = events.getItems();
-						if (items.isEmpty()) {
+            do {
+                CalendarList calendarList = service.calendarList().list()
+                        .setPageToken(pageToken).execute();
+                List<CalendarListEntry> listItems = calendarList.getItems();
 
-						} else {
-							userName = items.get(0).getCreator().getDisplayName();
-							for (final Event event : items) {
-								if ((clientName.contains(getProjecAndClienttName(event.getSummary()).get("CLI").trim()) || clientName.isEmpty() )
-										&&( projectName
-												.contains(getProjecAndClienttName(event.getSummary()).get("PRJ").trim())) ||  projectName.isEmpty() ) {
-									DateTime start = event.getStart().getDateTime();
-									DateTime end = event.getEnd().getDateTime();
-									if (start == null) {
-										start = event.getStart().getDate();
-									}
-									// put start event date at index 0 and end
-									// date
-									// at index 1
-									List<DateTime> dateList = new LinkedList<>();
-									dateList.add(start);
-									dateList.add(end);
-									excelData.put(event.getSummary(), dateList);
-									
-								}
-							}
-						}
-					}
-				}
-				pageToken = calendarList.getNextPageToken();
-			} while (pageToken != null);
+                for (CalendarListEntry calendarListEntry : listItems) {
+                    if (calendarName.contains(calendarListEntry.getSummary())) {
+                        final Events events = service.events()
+                                .list(calendarListEntry.getId())
+                                .setMaxResults(100).setTimeMin(from)
+                                .setOrderBy(CalendarConstant.START_TIME)
+                                .setTimeMax(to).setSingleEvents(true).execute();
+                        final List<Event> items = events.getItems();
+                        if (items.isEmpty()) {
 
-			List<Date> dateList = new LinkedList<>();
-			dateList.add(fromDate);
-			dateList.add(toDate);
-			ExcelService excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
-			excelService.generateExcel(userName, projectName, clientName, templatePath, inOutPath, excelData, dateList);
+                        } else {
+                            userName =
+                                    items.get(0).getCreator().getDisplayName();
+                            for (final Event event : items) {
+                                if ((clientName
+                                        .contains(getProjecAndClienttName(
+                                                event.getSummary()).get("CLI")
+                                                        .trim())
+                                        || clientName.isEmpty())
+                                        && (projectName.contains(
+                                                getProjecAndClienttName(
+                                                        event.getSummary())
+                                                                .get("PRJ")
+                                                                .trim()))
+                                        || projectName.isEmpty()) {
+                                    DateTime start =
+                                            event.getStart().getDateTime();
+                                    DateTime end = event.getEnd().getDateTime();
+                                    if (start == null) {
+                                        start = event.getStart().getDate();
+                                    }
+                                    // Index 0 has start date and index 1 has end date in dateList.
+                                    List<DateTime> dateList =
+                                            new LinkedList<>();
+                                    dateList.add(start);
+                                    dateList.add(end);
+                                    excelData.put(event.getSummary(), dateList);
 
-			File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
-			inputStream = new FileInputStream(file);
+                                }
+                            }
+                        }
+                    }
+                }
+                pageToken = calendarList.getNextPageToken();
+            } while (pageToken != null);
 
-			response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultName);
-			OutputStream outstream = response.getOutputStream();
-			IOUtils.copyLarge(inputStream, outstream);
+            List<Date> dateList = new LinkedList<>();
+            dateList.add(fromDate);
+            dateList.add(toDate);
+            ExcelService excelService = (ExcelService) ServiceFactory
+                    .getInstance(ExcelService.class);
+            excelService.generateExcel(userName, projectName, clientName,
+                    templatePath, inOutPath, excelData, dateList);
 
-		} catch (ParseException e) {
-			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
-			try {
-				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_PARSING_DATE);
-				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
-			} catch (ServletException | IOException e1) {				
-				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
-			}
-		} catch (ExcelFormatException e) {
-			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
-			try {
-				request.setAttribute(CalendarConstant.ERROR_MESSAGE,  CalendarConstant.ERROR_IN_READING_EXCEL);
-				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
-			} catch (ServletException | IOException e1) {
-				logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e1);
-				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
-			}
+            File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
+            inputStream = new FileInputStream(file);
 
-		} catch (Exception e) {
-			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
-			
-			try {
-				request.setAttribute(CalendarConstant.ERROR_MESSAGE,  CalendarConstant.ERROR_IN_SCV_VALIDATION);
-				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
-			} catch (ServletException | IOException e1) {
-				logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e1);
-				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
-			}
+            response.setHeader(CalendarConstant.CONTENT_HEADER,
+                    "attachment; filename=" + resultName);
+            OutputStream outstream = response.getOutputStream();
+            IOUtils.copyLarge(inputStream, outstream);
 
-		}
-		finally {
-			if(inputStream != null)
-			inputStream.close();
-		}
-	}
+        } catch (ParseException e) {
+            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+            try {
+                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                        CalendarConstant.ERROR_IN_PARSING_DATE);
+                request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
+                        .forward(request, response);
+            } catch (ServletException | IOException e1) {
+                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                        CalendarConstant.ERROR_IN_LOADING);
+            }
+        } catch (ExcelFormatException e) {
+            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+            try {
+                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                        CalendarConstant.ERROR_IN_READING_EXCEL);
+                request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
+                        .forward(request, response);
+            } catch (ServletException | IOException e1) {
+                logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
+                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                        CalendarConstant.ERROR_IN_LOADING);
+            }
 
-	private Map<String, String> getProjecAndClienttName(String summary) {
+        }catch (TokenResponseException e) {
+            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+            request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                    CalendarConstant.ERROR_IN_GOOGLE_AUTHENTICATION);
+            request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
+                    .forward(request, response);
+        } 
+        catch (Exception e) {
+            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
 
-		Map<String, String> map = new HashMap<>();
-		String[] eventData = summary.split(" ");	
-		for (String string : eventData) {
+            try {
+                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                        CalendarConstant.ERROR_IN_SCV_VALIDATION);
+                request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
+                        .forward(request, response);
+            } catch (ServletException | IOException e1) {
+                logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
+                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                        CalendarConstant.ERROR_IN_LOADING);
+            }
 
-			String[] keyValue = string.split(":");
-			if (keyValue != null && keyValue.length == 2) {
-				map.put(keyValue[0].trim(), keyValue[1].trim());
-			}
-		}
-		return map;
-	}
+        } finally {
+            if (inputStream != null)
+                inputStream.close();
+        }
+    }
+
+    private Map<String, String> getProjecAndClienttName(String summary) {
+
+        Map<String, String> map = new HashMap<>();
+        String[] eventData = summary.split(" ");
+        for (String string : eventData) {
+
+            String[] keyValue = string.split(":");
+            if (keyValue != null && keyValue.length == 2) {
+                map.put(keyValue[0].trim(), keyValue[1].trim());
+            }
+        }
+        return map;
+    }
 
 }

@@ -26,101 +26,107 @@ import com.google.calendar.csv.reader.CSVReader;
 /**
  * This class will used to read the csv file and convert the csv file data into
  * map object
- * 
- * @author DAMCO
  *
+ * @author DAMCO
  */
 public class CSVReaderImpl implements CSVReader {
 
-	public final Logger logger = Logger.getLogger(CSVReaderImpl.class);
+    public final Logger logger = Logger.getLogger(CSVReaderImpl.class);
 
+    /**
+     * Return Map of input parameter taken from CSV file
+     *
+     * @param request HttpServletRequest object with form parameter
+     * @return Map of input parameter
+     */
+    @Override
+    public Map<String, String> readCSV(final HttpServletRequest request,
+            final HttpServletResponse response) {
 
-	/**
-	 * 
-	 * Return Map of input parameter taken from CSV file
-	 * 
-	 * @param request
-	 *            HttpServletRequest object with form parameter
-	 * @return Map of input parameter
-	 */
-	public Map<String, String> readCSV(final HttpServletRequest request, HttpServletResponse response) {
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setSizeThreshold(CalendarConstant.MAXMEMSIZE);
+        // Location to save data that is larger than maxMemSize.
+        factory.setRepository(new File(CalendarConstant.TEMP_STORAGE_LOCATION));
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        upload.setSizeMax(CalendarConstant.MAXFILESIZE);
 
-		DiskFileItemFactory factory = new DiskFileItemFactory();		
-		factory.setSizeThreshold(CalendarConstant.MAXMEMSIZE);
-		// Location to save data that is larger than maxMemSize.
-		factory.setRepository(new File(CalendarConstant.TEMP_STORAGE_LOCATION));		
-		ServletFileUpload upload = new ServletFileUpload(factory);		
-		upload.setSizeMax(CalendarConstant.MAXFILESIZE);
+        // Create input from CSV
 
-		// Create input from CSV
+        BufferedReader bufferReader = null;
+        String line = "";
 
-		BufferedReader bufferReader = null;
-		String line = "";
+        String lastKey = "";
+        Map<String, String> inputMap = new LinkedHashMap<>();
+      
+        try {
+            List fileItems = upload.parseRequest(request);
+            Iterator iterator = fileItems.iterator();
+            InputStream inputStream = null;
+            while (iterator.hasNext()) {
+                FileItem fileItem = (FileItem) iterator.next();
+                if (!fileItem.isFormField()) {
 
-		String lastKey = "";
-		Map<String, String> inputMap = new LinkedHashMap<>();
-		File csvFile = new File(CalendarConstant.TEMP_FILE_LOCATION);
-		try {
-			List fileItems = upload.parseRequest(request);
-			Iterator iterator = fileItems.iterator();
-			InputStream inputStream=null;
-			while (iterator.hasNext()) {
-				FileItem fileItem = (FileItem) iterator.next();
-				if (!fileItem.isFormField()) {
+                    inputStream = fileItem.getInputStream();
 
-					inputStream = fileItem.getInputStream();
+                } else {
+                    throw new FileNotFoundException();
+                }
+            }
 
-				}else {
-					throw new FileNotFoundException();
-				}
-			}
+            bufferReader = new BufferedReader(
+                    new InputStreamReader(inputStream, "UTF-8"));
+            if ((line = bufferReader.readLine()) != null) {
 
-			bufferReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-			if ((line = bufferReader.readLine()) != null) {
+                // use ',' as separator
+                String[] argument = line.split(CalendarConstant.COMMA_SPLITTER);
 
-				// use ',' as separator
-				String[] argument = line.split(CalendarConstant.COMMA_SPLITTER);
+                for (int j = 0; j < argument.length; j++) {
 
-				for (int j = 0; j < argument.length; j++) {
+                    // use : as separator
+                    String[] argArray =
+                            argument[j].split(CalendarConstant.COL_SPLITTER, 2);
 
-					// use : as separator
-					String[] argArray = argument[j].split(CalendarConstant.COL_SPLITTER, 2);
+                    if (argArray.length == 1) {
+                        inputMap.replace(lastKey.trim(), inputMap.get(lastKey)
+                                .trim().concat("," + argArray[0]));
+                    } else {
+                        inputMap.put(argArray[0].trim(), argArray[1]);
+                        lastKey = argArray[0].trim();
+                    }
+                }
 
-					if (argArray.length == 1) {
-						inputMap.replace(lastKey.trim(), inputMap.get(lastKey).trim().concat("," + argArray[0]));
-					} else {
-						inputMap.put(argArray[0].trim(), argArray[1]);
-						lastKey = argArray[0].trim();
-					}
-				}
+            } else {
 
-			}else {
-				
-				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
-				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
-			}
+                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                        CalendarConstant.ERROR_IN_FILE_SELECTION);
+                request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
+                        .forward(request, response);
+            }
 
-		}  catch (Exception e) {
-			
-			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);		
-			 try {
-				 request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
-				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
-			} catch (ServletException | IOException e1) {
-				logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e1);
-				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
-			}
-		} finally {
-			if (bufferReader != null) {
-				try {
-					bufferReader.close();
-				} catch (IOException e) {
-					logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE , e);
-				}
-			}
-		}
+        } catch (Exception e) {
 
-		return inputMap;
-	}
+            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+            try {
+                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                        CalendarConstant.ERROR_IN_FILE_SELECTION);
+                request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
+                        .forward(request, response);
+            } catch (ServletException | IOException e1) {
+                logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
+                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
+                        CalendarConstant.ERROR_IN_LOADING);
+            }
+        } finally {
+            if (bufferReader != null) {
+                try {
+                    bufferReader.close();
+                } catch (IOException e) {
+                    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+                }
+            }
+        }
+
+        return inputMap;
+    }
 
 }
