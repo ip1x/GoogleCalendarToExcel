@@ -59,6 +59,9 @@ public class UploadServlet extends HttpServlet {
      * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse)
      */
+    /* (non-Javadoc)
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     @Override
     public void doPost(final HttpServletRequest request,
             final HttpServletResponse response)
@@ -69,8 +72,9 @@ public class UploadServlet extends HttpServlet {
                 (CSVReader) ServiceFactory.getInstance(CSVReader.class);
         Map<String, String> inputMap = csvReader.readCSV(request, response);
 
-        List<String> calendarName = Arrays.asList(inputMap.get(CalendarConstant.CALENDAR)
-                .split(CalendarConstant.COMMA_SPLITTER));
+        List<String> calendarName =
+                Arrays.asList(inputMap.get(CalendarConstant.CALENDAR)
+                        .split(CalendarConstant.COMMA_SPLITTER));
         String templatePath = inputMap.get(CalendarConstant.TEMPLATE) != null
                 ? inputMap.get(CalendarConstant.TEMPLATE)
                 : CalendarConstant.TEMPLATE_FILE_NAME;
@@ -99,15 +103,20 @@ public class UploadServlet extends HttpServlet {
         DateTime from = null;
         DateTime to = null;
         try {
-            
-            
+
+            java.util.Calendar today = java.util.Calendar.getInstance();
+
             Date fromDate = inputMap.get(CalendarConstant.FROM) != null
                     ? dateFormat.parse(inputMap.get(CalendarConstant.FROM))
-                    : new Date();
-            @SuppressWarnings("deprecation")
+                    : today.getTime();
+
+            java.util.Calendar yearEnd = java.util.Calendar.getInstance();
+            yearEnd.setTime(fromDate);
+            yearEnd.set(yearEnd.get(java.util.Calendar.YEAR), 11, 31);
+
             Date toDate = inputMap.get(CalendarConstant.TO) != null
                     ? dateFormat.parse(inputMap.get(CalendarConstant.TO))
-                    : new Date(fromDate.getYear(), 12, 31);
+                    : yearEnd.getTime();
 
             from = new DateTime(fromDate);
             to = new DateTime(toDate);
@@ -123,6 +132,8 @@ public class UploadServlet extends HttpServlet {
             Map<String, List<DateTime>> excelData = new HashMap<>();
             String userName = "";
             String pageToken = null;
+            
+            
 
             do {
                 CalendarList calendarList = service.calendarList().list()
@@ -143,30 +154,40 @@ public class UploadServlet extends HttpServlet {
                             userName =
                                     items.get(0).getCreator().getDisplayName();
                             for (final Event event : items) {
-                                if ((clientName
-                                        .contains(getProjecAndClienttName(
-                                                event.getSummary()).get("CLI")
-                                                        .trim())
-                                        || clientName.isEmpty())
-                                        && (projectName.contains(
-                                                getProjecAndClienttName(
-                                                        event.getSummary())
-                                                                .get("PRJ")
-                                                                .trim()))
-                                        || projectName.isEmpty()) {
-                                    DateTime start =
-                                            event.getStart().getDateTime();
-                                    DateTime end = event.getEnd().getDateTime();
-                                    if (start == null) {
-                                        start = event.getStart().getDate();
-                                    }
-                                    // Index 0 has start date and index 1 has end date in dateList.
-                                    List<DateTime> dateList =
-                                            new LinkedList<>();
-                                    dateList.add(start);
-                                    dateList.add(end);
-                                    excelData.put(event.getSummary(), dateList);
+                                try {
+                                    if ((clientName
+                                            .contains(getProjecAndClienttName(
+                                                    event.getSummary()).get("CLI")
+                                                            .trim())
+                                            || clientName.isEmpty())
+                                            && (projectName.contains(
+                                                    getProjecAndClienttName(
+                                                            event.getSummary())
+                                                                    .get("PRJ")
+                                                                    .trim()))
+                                            || projectName.isEmpty()) {
+                                        DateTime start =
+                                                event.getStart().getDateTime();
+                                        DateTime end = event.getEnd().getDateTime();
+                                        
+                                        if (start == null) {
+                                            start = event.getStart().getDate();
+                                        }
+                                        if (end == null) {
+                                            end = event.getEnd().getDate();
+                                        }
+                                        // Index 0 has start date and index 1 has
+                                        // end date in dateList.
+                                        List<DateTime> dateList =
+                                                new LinkedList<>();
+                                        dateList.add(start);
+                                        dateList.add(end);
+                                        excelData.put(event.getSummary(), dateList);
 
+                                    }
+                                } catch (Exception e) {
+                                    logger.info("Event with uncompiled name is found");
+                                    excelData.put(event.getSummary(), null);
                                 }
                             }
                         }
@@ -215,14 +236,13 @@ public class UploadServlet extends HttpServlet {
                         CalendarConstant.ERROR_IN_LOADING);
             }
 
-        }catch (TokenResponseException e) {
+        } catch (TokenResponseException e) {
             logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
             request.setAttribute(CalendarConstant.ERROR_MESSAGE,
                     CalendarConstant.ERROR_IN_GOOGLE_AUTHENTICATION);
             request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
                     .forward(request, response);
-        } 
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
 
             try {

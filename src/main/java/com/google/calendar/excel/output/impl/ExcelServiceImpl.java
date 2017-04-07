@@ -8,11 +8,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -51,6 +55,8 @@ public class ExcelServiceImpl implements ExcelService {
     static final String ACT = "ACT";
 
     public final Logger logger = Logger.getLogger(ExcelServiceImpl.class);
+    
+    GenerateOutputExcel generateOutputExcel;
 
     /*
      * (non-Javadoc)
@@ -85,7 +91,7 @@ public class ExcelServiceImpl implements ExcelService {
                     ExcelServiceImpl.WORKEDHOURS);
 
             // Create copy of supplied excel file to populate data in excel
-            GenerateOutputExcel generateOutputExcel = new GenerateOutputExcel();
+          generateOutputExcel = new GenerateOutputExcel();
             generateOutputExcel.generateExcelFile(templatePath);
 
             Sheet sheet = generateOutputExcel.getSheet();
@@ -99,9 +105,17 @@ public class ExcelServiceImpl implements ExcelService {
             Map<String, Map<String, String>> eventKeyValue = new HashMap<>();
             for (Map.Entry<String, List<DateTime>> entry : excelData
                     .entrySet()) {
-                Map<String, String> eventDetails =
-                        getDataFromEventName(entry, userName);
-                eventKeyValue.put(entry.getKey(), eventDetails);
+                Map<String, String> eventDetails = new HashMap<>();
+                if(entry.getValue() == null){
+                    eventDetails.put("ACT", entry.getKey());
+                    eventKeyValue.put(entry.getKey(), eventDetails);
+                }else {
+
+                    eventDetails =
+                            getDataFromEventName(entry, userName);
+                    eventKeyValue.put(entry.getKey(), eventDetails);
+                    
+                }
 
             }
 
@@ -177,14 +191,13 @@ public class ExcelServiceImpl implements ExcelService {
                 - new Date(entry.getValue().get(0).getValue()).getTime();
 
         long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
-        long diffInHours = TimeUnit.MILLISECONDS.toHours(duration);
 
         map.put(ENDDATE, CalendarConstant.df
                 .format(new Date(entry.getValue().get(1).getValue())));
         map.put(STARTDATE, CalendarConstant.df
                 .format(new Date(entry.getValue().get(0).getValue())));
         map.put(STAFF, userName);
-        map.put(WORKEDHOURS, diffInHours + " : " + diffInMinutes);
+        map.put(WORKEDHOURS, diffInMinutes/60 + ":" + diffInMinutes%60);
 
         return map;
 
@@ -221,9 +234,16 @@ public class ExcelServiceImpl implements ExcelService {
                         for (Entry entry : excelData.entrySet()) {
                             Row valueRow = sheet.getRow(j++);
                             if (valueRow != null) {
-                                Cell valueCell = valueRow.getCell(i);
-
-                                valueCell.setCellValue(
+                                Cell valueCell = valueRow.getCell(i);    
+                             /*  if(WORKEDHOURS.equalsIgnoreCase(propertyEntry.getKey().toString())){
+                                   CellStyle cs = generateOutputExcel.getWorkbook().createCellStyle();
+                                   
+                                   CreationHelper createHelper  = generateOutputExcel.getWorkbook().getCreationHelper();
+                                   cs.setDataFormat(
+                                           createHelper.createDataFormat().getFormat("[HH]:mm"));
+                                   valueCell.setCellStyle(cs);
+                               }*/
+                                        valueCell.setCellValue(
                                         (String) ((Map) entry.getValue())
                                                 .get(propertyEntry.getKey()));
                             }
@@ -338,6 +358,7 @@ public class ExcelServiceImpl implements ExcelService {
         for (Entry e : keyValue.entrySet()) {
             list.add(((Map<String, String>) e.getValue()).get(name.trim()));
         }
+        list.removeIf(Objects::isNull);
         return Joiner.on(",").join(list);
     }
 

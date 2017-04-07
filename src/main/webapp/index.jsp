@@ -29,7 +29,7 @@
   <h2>Gcalendar2XLS</h2>
   <p><form action="/GoogleCalendarToExcel/csv" method="post" enctype="multipart/form-data">
         <div style="color: #FF0000;">${errorMessage}</div>
-		<input id="data" type="file" name="file" size="50" class="inputAlign" /> <br /> 
+		<input id="data" type="file" name="file" size="50" class="inputAlign" title="Upload CSV file only."/> <br /> 
 		<input type="submit" class="btn btn-success"/>
 	</form>
   </p>
