@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 public class CalendarConstant {
 
     private CalendarConstant() {
-        // default constructor
+	// default constructor
 
     }
 
@@ -32,10 +32,11 @@ public class CalendarConstant {
 
     public static final String RESULT_FILE_NAME = "Results.xls";
 
-    public static final String CONFIGURATION_FILE_NAME =
-            "configuration.properties";
+    public static final String CONFIGURATION_FILE_NAME = "configuration.properties";
 
     public static final Format df = new SimpleDateFormat("MM/dd/yyyy");
+
+    public static final Format tableDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
 
     /**
      * Temporary file location. We can improve code quality by putting this on
@@ -100,16 +101,12 @@ public class CalendarConstant {
 
     public static final String ERROR_IN_PARSING_DATE = "Error in parsing Date";
 
-    public static final String ERROR_IN_READING_EXCEL =
-            "Error in reading excel File";
+    public static final String ERROR_IN_READING_EXCEL = "Error in reading excel File";
 
-    public static final String ERROR_IN_SCV_VALIDATION =
-            "Error in CSV validation";
+    public static final String ERROR_IN_SCV_VALIDATION = "Error in CSV validation";
 
-    public static final String ERROR_IN_FILE_SELECTION =
-            "Please Select a valid file";
+    public static final String ERROR_IN_FILE_SELECTION = "Please Select a valid file";
 
-    public static final String ERROR_IN_GOOGLE_AUTHENTICATION =
-            "Google Authentication failed. Kindly provide valid json file";
+    public static final String ERROR_IN_GOOGLE_AUTHENTICATION = "Google Authentication failed. Kindly provide valid json file";
 
 }
