@@ -11,6 +11,7 @@ public class CalendarConstant {
     }
 
     // CSV file field
+
     public static final String CALENDAR = "CALENDAR";
 
     public static final String TEMPLATE = "TEMPLATE";
@@ -28,13 +29,16 @@ public class CalendarConstant {
     public static final String TO = "TO";
 
     // Default file names for input parameter
+
     public static final String TEMPLATE_FILE_NAME = "Timesheet.xls";
 
     public static final String RESULT_FILE_NAME = "Results.xls";
 
     public static final String CONFIGURATION_FILE_NAME = "configuration.properties";
 
-    public static final Format df = new SimpleDateFormat("MM/dd/yyyy");
+    // Date format for output file
+
+    public static final Format excelHeaderdateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
     public static final Format tableDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
 
@@ -65,6 +69,7 @@ public class CalendarConstant {
     public static final String START_TIME = "startTime";
 
     // String splitter
+
     public static final String COMMA_SPLITTER = ",";
 
     public static final String COL_SPLITTER = ":";
@@ -89,13 +94,16 @@ public class CalendarConstant {
      */
     public static final String TEMP_FILE_LOCATION = "C:\\test.csv";
 
+    /**
+     * Home Page
+     */
+    public static final String HOME_PAGE = "/index.jsp";
+
     // error messages
 
     public static final String LOGGER_DEFAULT_MESSAGE = "Error due to : ";
 
     public static final String ERROR_MESSAGE = "errorMessage";
-
-    public static final String HOME_PAGE = "/index.jsp";
 
     public static final String ERROR_IN_LOADING = "Error in loading file";
 
@@ -108,5 +116,25 @@ public class CalendarConstant {
     public static final String ERROR_IN_FILE_SELECTION = "Please Select a valid file";
 
     public static final String ERROR_IN_GOOGLE_AUTHENTICATION = "Google Authentication failed. Kindly provide valid json file";
+
+    // Output Excel File Constants
+
+    public static final String STAFF = "Staff";
+
+    public static final String PROJECTS = "Projects";
+
+    public static final String CLIENTS = "Clients";
+
+    public static final String FROM_HEADER = "From";
+
+    public static final String TO_HEADER = "To";
+
+    public static final String STARTDATE = "Started on";
+
+    public static final String ENDDATE = "Ended on";
+
+    public static final String WORKEDHOURS = "Worked Hours";
+
+    public static final String ACT = "ACT";
 
 }

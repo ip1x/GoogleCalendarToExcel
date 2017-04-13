@@ -230,13 +230,20 @@ public class UploadServlet extends HttpServlet {
 
 	final Map<String, String> map = new HashMap<>();
 	final String[] eventData = summary.split(" ");
+	String lastKey = "";
 	for (final String string : eventData) {
-
 	    final String[] keyValue = string.split(":");
 	    if (keyValue != null && keyValue.length == 2) {
 		map.put(keyValue[0].trim(), keyValue[1].trim());
-	    } else {
+		lastKey = keyValue[0].trim();
+	    } else if (keyValue.length == 3) {
 		return new HashMap<>();
+	    } else if (keyValue.length == 1 && !"".equals(lastKey)) {
+		if (keyValue[0].charAt(0) == '@' || keyValue[0].charAt(0) == '%') {
+		    lastKey = "";
+		} else {
+		    map.replace(lastKey, map.get(lastKey).concat(" ").concat(keyValue[0].trim()));
+		}
 	    }
 	}
 	return map;

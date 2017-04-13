@@ -1,5 +1,15 @@
 package com.google.calendar.excel.output.impl;
 
+import static com.google.calendar.constant.CalendarConstant.ACT;
+import static com.google.calendar.constant.CalendarConstant.CLIENTS;
+import static com.google.calendar.constant.CalendarConstant.ENDDATE;
+import static com.google.calendar.constant.CalendarConstant.FROM_HEADER;
+import static com.google.calendar.constant.CalendarConstant.PROJECTS;
+import static com.google.calendar.constant.CalendarConstant.STAFF;
+import static com.google.calendar.constant.CalendarConstant.STARTDATE;
+import static com.google.calendar.constant.CalendarConstant.TO_HEADER;
+import static com.google.calendar.constant.CalendarConstant.WORKEDHOURS;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,31 +43,13 @@ import com.google.common.base.Joiner;
  */
 public class ExcelServiceImpl implements ExcelService {
 
-    static final String STAFF = "Staff";
-
-    static final String PROJECT = "Projects";
-
-    static final String CLIENT = "Clients";
-
-    static final String FROM = "From";
-
-    static final String TO = "To";
-
-    static final String STARTDATE = "Started on";
-
-    static final String ENDDATE = "Ended on";
-
-    static final String WORKEDHOURS = "Worked Hours";
-
-    static final String ACT = "ACT";
-
     public final Logger logger = Logger.getLogger(ExcelServiceImpl.class);
 
     GenerateOutputExcel generateOutputExcel;
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.google.calendar.excel.output.ExcelService#generateExcel(java.lang.
      * String, java.util.List, java.util.List, java.lang.String,
@@ -77,10 +69,10 @@ public class ExcelServiceImpl implements ExcelService {
 	    final Map<String, String> propertyMap = configurationFileParser.getPropertyMap();
 
 	    // Added excel header field which comes from event details
-	    propertyMap.put(ExcelServiceImpl.STARTDATE, ExcelServiceImpl.STARTDATE);
-	    propertyMap.put(ExcelServiceImpl.ENDDATE, ExcelServiceImpl.ENDDATE);
-	    propertyMap.put(ExcelServiceImpl.STAFF, ExcelServiceImpl.STAFF);
-	    propertyMap.put(ExcelServiceImpl.WORKEDHOURS, ExcelServiceImpl.WORKEDHOURS);
+	    propertyMap.put(STARTDATE, STARTDATE);
+	    propertyMap.put(ENDDATE, ENDDATE);
+	    propertyMap.put(STAFF, STAFF);
+	    propertyMap.put(WORKEDHOURS, WORKEDHOURS);
 
 	    // Create copy of supplied excel file to populate data in excel
 	    generateOutputExcel = new GenerateOutputExcel();
@@ -98,7 +90,7 @@ public class ExcelServiceImpl implements ExcelService {
 	    for (final Map.Entry<String, List<DateTime>> entry : excelData.entrySet()) {
 		Map<String, String> eventDetails = new HashMap<>();
 		if (entry.getValue() == null) {
-		    eventDetails.put("ACT", entry.getKey());
+		    eventDetails.put(ACT, entry.getKey());
 		    eventKeyValue.put(entry.getKey(), eventDetails);
 		} else {
 
@@ -157,12 +149,14 @@ public class ExcelServiceImpl implements ExcelService {
 	for (final String string : eventData) {
 
 	    final String[] keyValue = string.split(":");
+
 	    if (keyValue != null && keyValue.length == 2) {
 		map.put(keyValue[0].trim(), keyValue[1].trim());
 	    } else {
 		if (keyValue[0].charAt(0) != '@' && keyValue[0].charAt(0) != '%') {
 		    actStringPart.append(" " + keyValue[0]);
 		} else {
+		    // This will work for "@" and "%"
 		    map.put(Character.toString(keyValue[0].trim().charAt(0)),
 			    keyValue[0].trim().substring(1, keyValue[0].length()));
 		}
@@ -204,7 +198,7 @@ public class ExcelServiceImpl implements ExcelService {
      */
     public void setColumnsValue(final Sheet sheet, final int columnSize, final int headerRowNo,
 	    final Map<String, Map<String, String>> excelData, final Map<String, String> propertyMap) {
-	final int lastColumnSize = headerRowNo + excelData.size();
+	final int lastRowSize = headerRowNo + excelData.size();
 	final Row headerRow = sheet.getRow(headerRowNo);
 	for (final Entry propertyEntry : propertyMap.entrySet()) {
 	    for (int i = 0; i < columnSize; i++) {
@@ -216,28 +210,12 @@ public class ExcelServiceImpl implements ExcelService {
 
 		if (hearderCell != null && hearderCell.getStringCellValue().trim()
 			.equalsIgnoreCase((String) propertyEntry.getValue())) {
-		    for (int j = headerRowNo + 1; j <= lastColumnSize; j++) {
+		    for (int j = headerRowNo + 1; j <= lastRowSize; j++) {
 
 			for (final Entry entry : excelData.entrySet()) {
 			    final Row valueRow = sheet.getRow(j++);
 			    if (valueRow != null) {
 				final Cell valueCell = valueRow.getCell(i);
-				/*
-				 * if(WORKEDHOURS.equalsIgnoreCase(propertyEntry
-				 * .getKey().toString())){
-				 * CellStyle cs =
-				 * generateOutputExcel.getWorkbook().
-				 * createCellStyle();
-				 * 
-				 * CreationHelper createHelper =
-				 * generateOutputExcel.getWorkbook().
-				 * getCreationHelper();
-				 * cs.setDataFormat(
-				 * createHelper.createDataFormat().getFormat(
-				 * "[HH]:mm"));
-				 * valueCell.setCellStyle(cs);
-				 * }
-				 */
 				valueCell.setCellValue((String) ((Map) entry.getValue()).get(propertyEntry.getKey()));
 			    }
 			}
@@ -289,21 +267,21 @@ public class ExcelServiceImpl implements ExcelService {
 				valueCell.setCellValue(userName);
 				break;
 
-			    case FROM:
+			    case FROM_HEADER:
 				valueCell = row.getCell(j + 1);
-				valueCell.setCellValue(CalendarConstant.df.format(startDate));
+				valueCell.setCellValue(CalendarConstant.excelHeaderdateFormat.format(startDate));
 				break;
 
-			    case TO:
+			    case TO_HEADER:
 				valueCell = row.getCell(j + 1);
-				valueCell.setCellValue(CalendarConstant.df.format(endDate));
+				valueCell.setCellValue(CalendarConstant.excelHeaderdateFormat.format(endDate));
 				break;
 
-			    case CLIENT:
+			    case CLIENTS:
 				valueCell = row.getCell(j + 1);
 				valueCell.setCellValue(clientName);
 				break;
-			    case PROJECT:
+			    case PROJECTS:
 				valueCell = row.getCell(j + 1);
 				valueCell.setCellValue(projectNames);
 				break;

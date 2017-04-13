@@ -27,61 +27,75 @@ public class GenerateOutputExcel {
     private Sheet sheet;
 
     public GenerateOutputExcel() {
-        // default constructor
+	// default constructor
     }
 
     /**
      * Will read and generate excel file from specified path
      *
-     * @param path template path to read from
+     * @param path
+     *            template path to read from
      * @throws URISyntaxException
      * @throws IOException
      * @throws EncryptedDocumentException
      * @throws InvalidFormatException
      */
-    public void generateExcelFile(final String path) throws URISyntaxException,
-            IOException, EncryptedDocumentException, InvalidFormatException {
+    public void generateExcelFile(final String path)
+	    throws URISyntaxException, IOException, EncryptedDocumentException, InvalidFormatException {
 
-        copyTemplateFile(path);
-        workbook = WorkbookFactory.create(
-                new FileInputStream(CalendarConstant.DESTINATION_FILE_PATH));
-        sheet = workbook.getSheetAt(0);
+	copyTemplateFile(path);
+	workbook = WorkbookFactory.create(new FileInputStream(CalendarConstant.DESTINATION_FILE_PATH));
+	sheet = workbook.getSheetAt(0);
     }
 
     /**
      * Create a copy of excel file to write data on it.
      *
-     * @param path url
+     * @param path
+     *            url
      * @throws URISyntaxException
      * @throws IOException
      */
-    private void copyTemplateFile(final String path)
-            throws URISyntaxException, IOException {
-        File templateFile;
-        if ("Timesheet.xls".equalsIgnoreCase(path)) {
-            final URL url =
-                    getClass().getClassLoader().getResource("Timesheet.xls");
-            templateFile = new File(url.toURI());
-        } else {
-            templateFile = new File(path);
-        }
-        final File newFile = new File(CalendarConstant.DESTINATION_FILE_PATH);
-        Files.copy(templateFile, newFile);
+    private void copyTemplateFile(final String path) throws URISyntaxException, IOException {
+	File templateFile;
+	if (CalendarConstant.TEMPLATE_FILE_NAME.equalsIgnoreCase(path)) {
+	    final URL url = getClass().getClassLoader().getResource(CalendarConstant.TEMPLATE_FILE_NAME);
+	    templateFile = new File(url.toURI());
+	} else {
+	    templateFile = new File(path);
+	}
+	final File newFile = new File(CalendarConstant.DESTINATION_FILE_PATH);
+	Files.copy(templateFile, newFile);
     }
 
     public Workbook getWorkbook() {
-        return workbook;
+	return workbook;
     }
 
+    /**
+     * set workbook object
+     *
+     * @return
+     */
     public void setWorkbook(final Workbook workbook) {
-        this.workbook = workbook;
+	this.workbook = workbook;
     }
 
+    /**
+     * getter
+     *
+     * @return
+     */
     public Sheet getSheet() {
-        return sheet;
+	return sheet;
     }
 
+    /**
+     * set sheet object
+     *
+     * @param sheet
+     */
     public void setSheet(final Sheet sheet) {
-        this.sheet = sheet;
+	this.sheet = sheet;
     }
 }

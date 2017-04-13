@@ -30,8 +30,7 @@ public class ConfigurationFileParser {
      */
     private InputStream input = null;
 
-    public final Logger logger =
-            Logger.getLogger(ConfigurationFileParser.class);
+    public final Logger logger = Logger.getLogger(ConfigurationFileParser.class);
 
     /**
      * Will contain all key pair.
@@ -41,39 +40,38 @@ public class ConfigurationFileParser {
     /**
      * Constructor which initialize the property object
      *
-     * @param path Location of configuration file
+     * @param path
+     *            Location of configuration file
      */
     public ConfigurationFileParser(final String path) {
-        try {
-            property = new Properties();
-            if (path != null
-                    && path.equals(CalendarConstant.CONFIGURATION_FILE_NAME)) {
-                input = getClass().getClassLoader().getResourceAsStream(
-                        CalendarConstant.CONFIGURATION_FILE_NAME);
-            } else {
-                input = new FileInputStream(new File(path));
-            }
-            loadPropertyFile();
-        } catch (Exception e) {
-            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
-        }
+	try {
+	    property = new Properties();
+	    if (path != null && path.equals(CalendarConstant.CONFIGURATION_FILE_NAME)) {
+		input = getClass().getClassLoader().getResourceAsStream(CalendarConstant.CONFIGURATION_FILE_NAME);
+	    } else {
+		input = new FileInputStream(new File(path));
+	    }
+	    loadPropertyFile();
+	} catch (final Exception e) {
+	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+	}
     }
 
     /**
      * Will load the properties file from disk or classpath
      */
     public void loadPropertyFile() {
-        try {
-            property.load(input);
-            final Enumeration<?> e = property.propertyNames();
-            while (e.hasMoreElements()) {
-                final String key = (String) e.nextElement();
-                final String value = property.getProperty(key);
-                propertyMap.put(key, value);
-            }
-        } catch (final IOException e) {
-            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
-        }
+	try {
+	    property.load(input);
+	    final Enumeration<?> e = property.propertyNames();
+	    while (e.hasMoreElements()) {
+		final String key = (String) e.nextElement();
+		final String value = property.getProperty(key);
+		propertyMap.put(key, value);
+	    }
+	} catch (final IOException e) {
+	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+	}
     }
 
     /**
@@ -83,16 +81,16 @@ public class ConfigurationFileParser {
      * @return
      */
     public String getPropertyByKey(final String key) {
-        return property.getProperty(key);
+	return property.getProperty(key);
     }
 
     /**
-     * setter
+     * getter
      *
      * @return
      */
     public Properties getProperty() {
-        return property;
+	return property;
     }
 
     /**
@@ -102,6 +100,6 @@ public class ConfigurationFileParser {
      * @return
      */
     public Map<String, String> getPropertyMap() {
-        return propertyMap;
+	return propertyMap;
     }
 }
