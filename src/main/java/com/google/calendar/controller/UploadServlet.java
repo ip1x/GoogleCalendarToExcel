@@ -190,7 +190,7 @@ public class UploadServlet extends HttpServlet {
 		IOUtils.copyLarge(inputStream, outstream);
 		request.setAttribute(CalendarConstant.ERROR_MESSAGE, "");
 	    } else {
-		request.setAttribute(CalendarConstant.ERROR_MESSAGE, "No events Found");
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_NO_EVENT_FOUND);
 		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
 	    }
 

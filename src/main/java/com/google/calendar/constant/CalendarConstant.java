@@ -117,6 +117,8 @@ public class CalendarConstant {
 
     public static final String ERROR_IN_GOOGLE_AUTHENTICATION = "Google Authentication failed. Kindly provide valid json file";
 
+    public static final String ERROR_NO_EVENT_FOUND = "No Events Found";
+
     // Output Excel File Constants
 
     public static final String STAFF = "Staff";
