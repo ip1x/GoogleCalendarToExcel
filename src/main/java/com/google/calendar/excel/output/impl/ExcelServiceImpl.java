@@ -12,13 +12,14 @@ import static com.google.calendar.constant.CalendarConstant.WORKEDHOURS;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
@@ -319,7 +320,7 @@ public class ExcelServiceImpl implements ExcelService {
      */
     private String getValueFromKeyAsString(final Map<String, Map<String, String>> keyValue, final String name) {
 
-	final List<String> list = new ArrayList<>();
+	final Set<String> list = new HashSet();
 	for (final Entry e : keyValue.entrySet()) {
 	    list.add(((Map<String, String>) e.getValue()).get(name.trim()));
 	}

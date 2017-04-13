@@ -70,6 +70,7 @@ public class UploadServlet extends HttpServlet {
 	    throws ServletException, IOException {
 
 	InputStream inputStream = null;
+	Event firstEvent = null;
 	try {
 	    response.setContentType(CalendarConstant.CONTENT_TYPE);
 	    final CSVReader csvReader = (CSVReader) ServiceFactory.getInstance(CSVReader.class);
@@ -142,8 +143,8 @@ public class UploadServlet extends HttpServlet {
 					    .contains(getProjecAndClienttName(event.getSummary()).get("CLI").trim())
 					    || clientName.isEmpty())
 					    && (projectName.contains(
-						    getProjecAndClienttName(event.getSummary()).get("PRJ").trim()))
-					    || projectName.isEmpty()) {
+						    getProjecAndClienttName(event.getSummary()).get("PRJ").trim())
+						    || projectName.isEmpty())) {
 					DateTime start = event.getStart().getDateTime();
 					DateTime end = event.getEnd().getDateTime();
 
@@ -159,6 +160,7 @@ public class UploadServlet extends HttpServlet {
 					final List<DateTime> dateList = new LinkedList<>();
 					dateList.add(start);
 					dateList.add(end);
+					firstEvent = event;
 					excelData.put(event.getSummary(), dateList);
 
 				    }
@@ -179,12 +181,18 @@ public class UploadServlet extends HttpServlet {
 	    final ExcelService excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
 	    excelService.generateExcel(userName, projectName, clientName, templatePath, inOutPath, excelData, dateList);
 
-	    final File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
-	    inputStream = new FileInputStream(file);
+	    if (firstEvent != null) {
+		final File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
+		inputStream = new FileInputStream(file);
 
-	    response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultName);
-	    final OutputStream outstream = response.getOutputStream();
-	    IOUtils.copyLarge(inputStream, outstream);
+		response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultName);
+		final OutputStream outstream = response.getOutputStream();
+		IOUtils.copyLarge(inputStream, outstream);
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, "");
+	    } else {
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, "No events Found");
+		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+	    }
 
 	} catch (final ParseException e) {
 	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
