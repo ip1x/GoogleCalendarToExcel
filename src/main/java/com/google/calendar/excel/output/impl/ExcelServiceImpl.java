@@ -85,7 +85,7 @@ public class ExcelServiceImpl implements ExcelService {
 	    final int columnSize = propertyMap.size() + 2;
 
 	    // Row number of table header
-	    final int headerRow = getStartHeader(sheet, columnSize);
+	    final int headerRow = getStartHeader(sheet, columnSize, propertyMap);
 
 	    final Map<String, Map<String, String>> eventKeyValue = new HashMap<>();
 	    for (final Map.Entry<String, List<DateTime>> entry : excelData.entrySet()) {
@@ -297,14 +297,14 @@ public class ExcelServiceImpl implements ExcelService {
      *            max column size
      * @return row number
      */
-    private int getStartHeader(final Sheet sheet, final int columnSize) {
+    private int getStartHeader(final Sheet sheet, final int columnSize, Map<String, String> inputMap) {
 	for (int i = 0; true; i++) {
 	    for (int j = 0; j < columnSize; j++) {
 		final Row row = sheet.getRow(i);
 		if (row != null) {
 		    final Cell cell = row.getCell(j);
 		    if (cell != null && cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()
-			    && cell.getStringCellValue().trim().equals(STARTDATE)) {
+			    && inputMap.values().contains( cell.getStringCellValue().trim()) ) {
 			return i;
 		    }
 		}
