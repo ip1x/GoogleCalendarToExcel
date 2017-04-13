@@ -144,27 +144,19 @@ public class ExcelServiceImpl implements ExcelService {
 	final Map<String, String> map = new HashMap<>();
 
 	final String[] eventData = (entry.getKey()).split(" ");
-
-	StringBuilder actStringPart = new StringBuilder("");
+	String lastKey = "";
 	for (final String string : eventData) {
-
 	    final String[] keyValue = string.split(":");
-
 	    if (keyValue != null && keyValue.length == 2) {
 		map.put(keyValue[0].trim(), keyValue[1].trim());
-	    } else {
-		if (keyValue[0].charAt(0) != '@' && keyValue[0].charAt(0) != '%') {
-		    actStringPart.append(" " + keyValue[0]);
-		} else {
-		    // This will work for "@" and "%"
+		lastKey = keyValue[0].trim();
+	    } else if (keyValue.length == 1) {
+		if (keyValue[0].charAt(0) == '@' || keyValue[0].charAt(0) == '%') {
 		    map.put(Character.toString(keyValue[0].trim().charAt(0)),
 			    keyValue[0].trim().substring(1, keyValue[0].length()));
+		} else {
+		    map.replace(lastKey, map.get(lastKey).concat(" ").concat(keyValue[0]));
 		}
-	    }
-	    if (map.containsKey(ACT)) {
-		map.replace(ACT, map.get(ACT) + actStringPart);
-		actStringPart = new StringBuilder("");
-
 	    }
 	}
 
