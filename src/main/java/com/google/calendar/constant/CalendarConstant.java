@@ -139,4 +139,6 @@ public class CalendarConstant {
 
     public static final String ACT = "ACT";
 
+    public static final String USERS = "Users";
+
 }

@@ -8,6 +8,7 @@ import static com.google.calendar.constant.CalendarConstant.PROJECTS;
 import static com.google.calendar.constant.CalendarConstant.STAFF;
 import static com.google.calendar.constant.CalendarConstant.STARTDATE;
 import static com.google.calendar.constant.CalendarConstant.TO_HEADER;
+import static com.google.calendar.constant.CalendarConstant.USERS;
 import static com.google.calendar.constant.CalendarConstant.WORKEDHOURS;
 
 import java.io.FileOutputStream;
@@ -255,7 +256,7 @@ public class ExcelServiceImpl implements ExcelService {
 		    Cell valueCell;
 		    if (cell != null && cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
 			switch (cell.getStringCellValue().trim()) {
-			    case STAFF:
+			    case USERS:
 				valueCell = row.getCell(j + 1);
 				valueCell.setCellValue(userName);
 				break;
@@ -297,14 +298,14 @@ public class ExcelServiceImpl implements ExcelService {
      *            max column size
      * @return row number
      */
-    private int getStartHeader(final Sheet sheet, final int columnSize, Map<String, String> inputMap) {
+    private int getStartHeader(final Sheet sheet, final int columnSize, final Map<String, String> inputMap) {
 	for (int i = 0; true; i++) {
 	    for (int j = 0; j < columnSize; j++) {
 		final Row row = sheet.getRow(i);
 		if (row != null) {
 		    final Cell cell = row.getCell(j);
 		    if (cell != null && cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()
-			    && inputMap.values().contains( cell.getStringCellValue().trim()) ) {
+			    && inputMap.values().contains(cell.getStringCellValue().trim())) {
 			return i;
 		    }
 		}
@@ -318,14 +319,15 @@ public class ExcelServiceImpl implements ExcelService {
      * @param clients
      * @return
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private String getValueFromKeyAsString(final Map<String, Map<String, String>> keyValue, final String name) {
 
-	final Set<String> list = new HashSet();
-	for (final Entry e : keyValue.entrySet()) {
-	    list.add(((Map<String, String>) e.getValue()).get(name.trim()));
+	final Set<String> set = new HashSet();
+	for (final Entry entry : keyValue.entrySet()) {
+	    set.add(((Map<String, String>) entry.getValue()).get(name.trim()));
 	}
-	list.removeIf(Objects::isNull);
-	return Joiner.on(",").join(list);
+	set.removeIf(Objects::isNull);
+	return Joiner.on(",").join(set);
     }
 
 }

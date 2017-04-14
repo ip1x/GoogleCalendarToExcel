@@ -139,11 +139,9 @@ public class UploadServlet extends HttpServlet {
 			    userName = items.get(0).getCreator().getDisplayName();
 			    for (final Event event : items) {
 				try {
-				    if ((clientName
-					    .contains(getProjecAndClienttName(event.getSummary()).get("CLI").trim())
-					    || clientName.isEmpty())
-					    && (projectName.contains(
-						    getProjecAndClienttName(event.getSummary()).get("PRJ").trim())
+				    final Map<String, String> summaryMap = getProjecAndClientName(event.getSummary());
+				    if ((clientName.contains(summaryMap.get("CLI").trim()) || clientName.isEmpty())
+					    && (projectName.contains(summaryMap.get("PRJ").trim())
 						    || projectName.isEmpty())) {
 					DateTime start = event.getStart().getDateTime();
 					DateTime end = event.getEnd().getDateTime();
@@ -240,7 +238,7 @@ public class UploadServlet extends HttpServlet {
 	}
     }
 
-    private Map<String, String> getProjecAndClienttName(final String summary) {
+    private Map<String, String> getProjecAndClientName(final String summary) {
 
 	final Map<String, String> map = new HashMap<>();
 	final String[] eventData = summary.split(" ");
