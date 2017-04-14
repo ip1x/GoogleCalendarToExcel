@@ -80,7 +80,7 @@ public class UploadServlet extends HttpServlet {
 		    .asList(inputMap.get(CalendarConstant.CALENDAR).split(CalendarConstant.COMMA_SPLITTER));
 	    final String templatePath = inputMap.get(CalendarConstant.TEMPLATE) != null
 		    ? inputMap.get(CalendarConstant.TEMPLATE) : CalendarConstant.TEMPLATE_FILE_NAME;
-	    final String resultName = inputMap.get(CalendarConstant.OUTFILE) != null
+	     String resultPath = inputMap.get(CalendarConstant.OUTFILE) != null
 		    ? inputMap.get(CalendarConstant.OUTFILE) : CalendarConstant.RESULT_FILE_NAME;
 	    final String inOutPath = inputMap.get(CalendarConstant.INOUTMAP) != null
 		    ? inputMap.get(CalendarConstant.INOUTMAP) : CalendarConstant.CONFIGURATION_FILE_NAME;
@@ -179,13 +179,19 @@ public class UploadServlet extends HttpServlet {
 	    dateList.add(fromDate);
 	    dateList.add(toDate);
 	    final ExcelService excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
-	    excelService.generateExcel(userName, projectName, clientName, templatePath, inOutPath, excelData, dateList);
+	    excelService.generateExcel(userName, projectName, clientName, templatePath, inOutPath, excelData, dateList,resultPath);
 
 	    if (firstEvent != null) {
 		final File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
 		inputStream = new FileInputStream(file);
-
-		response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultName);
+		
+		
+		if(!resultPath.equals(CalendarConstant.RESULT_FILE_NAME)){
+		    String[] splitPathArr = resultPath.split("\\\\");
+		    resultPath = splitPathArr[splitPathArr.length-1];
+		}
+		
+		response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultPath);
 		final OutputStream outstream = response.getOutputStream();
 		IOUtils.copyLarge(inputStream, outstream);
 		request.setAttribute(CalendarConstant.ERROR_MESSAGE, "");

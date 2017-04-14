@@ -59,7 +59,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public void generateExcel(final String userName, final List<String> projectName, final List<String> clientName,
 	    final String templatePath, final String inOutPath, final Map<String, List<DateTime>> excelData,
-	    final List<Date> dateList) throws ExcelFormatException {
+	    final List<Date> dateList, String resultPath) throws ExcelFormatException {
 
 	FileOutputStream outFile = null;
 	try {
@@ -77,7 +77,7 @@ public class ExcelServiceImpl implements ExcelService {
 
 	    // Create copy of supplied excel file to populate data in excel
 	    generateOutputExcel = new GenerateOutputExcel();
-	    generateOutputExcel.generateExcelFile(templatePath);
+	    generateOutputExcel.generateExcelFile(templatePath,resultPath);
 
 	    final Sheet sheet = generateOutputExcel.getSheet();
 

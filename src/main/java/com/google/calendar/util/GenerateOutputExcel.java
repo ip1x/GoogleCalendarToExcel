@@ -40,10 +40,10 @@ public class GenerateOutputExcel {
      * @throws EncryptedDocumentException
      * @throws InvalidFormatException
      */
-    public void generateExcelFile(final String path)
+    public void generateExcelFile(final String path, String resultPath)
 	    throws URISyntaxException, IOException, EncryptedDocumentException, InvalidFormatException {
 
-	copyTemplateFile(path);
+	copyTemplateFile(path, resultPath);
 	workbook = WorkbookFactory.create(new FileInputStream(CalendarConstant.DESTINATION_FILE_PATH));
 	sheet = workbook.getSheetAt(0);
     }
@@ -56,15 +56,17 @@ public class GenerateOutputExcel {
      * @throws URISyntaxException
      * @throws IOException
      */
-    private void copyTemplateFile(final String path) throws URISyntaxException, IOException {
+    private void copyTemplateFile(final String path, String resultPath) throws URISyntaxException, IOException {
 	File templateFile;
+	
 	if (CalendarConstant.TEMPLATE_FILE_NAME.equalsIgnoreCase(path)) {
 	    final URL url = getClass().getClassLoader().getResource(CalendarConstant.TEMPLATE_FILE_NAME);
 	    templateFile = new File(url.toURI());
 	} else {
 	    templateFile = new File(path);
 	}
-	final File newFile = new File(CalendarConstant.DESTINATION_FILE_PATH);
+	
+	File newFile = new File( CalendarConstant.RESULT_FILE_NAME.equals( resultPath ) ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
 	Files.copy(templateFile, newFile);
     }
 

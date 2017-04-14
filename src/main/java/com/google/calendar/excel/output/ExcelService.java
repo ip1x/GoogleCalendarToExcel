@@ -36,7 +36,7 @@ public interface ExcelService {
 	 * @throws ExcelFormatException
 	 */
 	public void generateExcel(String userName, List<String> projectName, List<String> clientName, String templatePath,
-			String inOutPath, Map<String, List<DateTime>> excelData, List<Date> dateList)
+			String inOutPath, Map<String, List<DateTime>> excelData, List<Date> dateList, String resultPath)
 			throws ExcelFormatException;
 	/**
 	 * Will convert event name into data field.
