@@ -44,7 +44,7 @@ public class GenerateOutputExcel {
 	    throws URISyntaxException, IOException, EncryptedDocumentException, InvalidFormatException {
 
 	copyTemplateFile(path, resultPath);
-	workbook = WorkbookFactory.create(new FileInputStream(CalendarConstant.DESTINATION_FILE_PATH));
+	workbook = WorkbookFactory.create(new FileInputStream( CalendarConstant.RESULT_FILE_NAME.equals( resultPath ) ? CalendarConstant.DESTINATION_FILE_PATH : resultPath));
 	sheet = workbook.getSheetAt(0);
     }
 

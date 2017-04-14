@@ -180,7 +180,7 @@ public class UploadServlet extends HttpServlet {
 	    excelService.generateExcel(userName, projectName, clientName, templatePath, inOutPath, excelData, dateList,resultPath);
 
 	    if (firstEvent != null) {
-		final File file = new File(CalendarConstant.DESTINATION_FILE_PATH);
+		final File file = new File( CalendarConstant.RESULT_FILE_NAME.equals( resultPath ) ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
 		inputStream = new FileInputStream(file);
 		
 		

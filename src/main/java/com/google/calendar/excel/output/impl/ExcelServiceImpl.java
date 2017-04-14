@@ -112,7 +112,7 @@ public class ExcelServiceImpl implements ExcelService {
 	    setColumnsValue(sheet, columnSize, headerRow, eventKeyValue, propertyMap);
 
 	    // update the excel with updated sheet.
-	    outFile = new FileOutputStream(CalendarConstant.DESTINATION_FILE_PATH);
+	    outFile = new FileOutputStream( CalendarConstant.RESULT_FILE_NAME.equals( resultPath ) ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
 	    generateOutputExcel.getWorkbook().write(outFile);
 	    outFile.close();
 
