@@ -60,7 +60,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public void generateExcel(final String userName, final List<String> projectName, final List<String> clientName,
 	    final String templatePath, final String inOutPath, final Map<String, List<DateTime>> excelData,
-	    final List<Date> dateList, String resultPath) throws ExcelFormatException {
+	    final List<Date> dateList, final String resultPath) throws ExcelFormatException {
 
 	FileOutputStream outFile = null;
 	try {
@@ -78,7 +78,7 @@ public class ExcelServiceImpl implements ExcelService {
 
 	    // Create copy of supplied excel file to populate data in excel
 	    generateOutputExcel = new GenerateOutputExcel();
-	    generateOutputExcel.generateExcelFile(templatePath,resultPath);
+	    generateOutputExcel.generateExcelFile(templatePath, resultPath);
 
 	    final Sheet sheet = generateOutputExcel.getSheet();
 
@@ -112,7 +112,8 @@ public class ExcelServiceImpl implements ExcelService {
 	    setColumnsValue(sheet, columnSize, headerRow, eventKeyValue, propertyMap);
 
 	    // update the excel with updated sheet.
-	    outFile = new FileOutputStream( CalendarConstant.RESULT_FILE_NAME.equals( resultPath ) ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
+	    outFile = new FileOutputStream(CalendarConstant.RESULT_FILE_NAME.equals(resultPath)
+		    ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
 	    generateOutputExcel.getWorkbook().write(outFile);
 	    outFile.close();
 
@@ -153,6 +154,9 @@ public class ExcelServiceImpl implements ExcelService {
 		map.put(keyValue[0].trim(), keyValue[1].trim());
 		lastKey = keyValue[0].trim();
 	    } else if (keyValue.length == 1) {
+		if ("".equals(keyValue[0])) {
+		    continue;
+		}
 		if (keyValue[0].charAt(0) == '@' || keyValue[0].charAt(0) == '%') {
 		    map.put(Character.toString(keyValue[0].trim().charAt(0)),
 			    keyValue[0].trim().substring(1, keyValue[0].length()));
@@ -170,7 +174,7 @@ public class ExcelServiceImpl implements ExcelService {
 	map.put(ENDDATE, CalendarConstant.tableDateFormat.format(new Date(entry.getValue().get(1).getValue())));
 	map.put(STARTDATE, CalendarConstant.tableDateFormat.format(new Date(entry.getValue().get(0).getValue())));
 	map.put(STAFF, userName);
-	map.put(WORKEDHOURS, diffInMinutes / 60 + ":" + diffInMinutes % 60);
+	map.put(WORKEDHOURS, diffInMinutes / 60 + ":" + String.format("%02d", diffInMinutes % 60));
 
 	return map;
 
