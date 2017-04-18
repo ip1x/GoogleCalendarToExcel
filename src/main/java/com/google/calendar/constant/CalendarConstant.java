@@ -3,6 +3,12 @@ package com.google.calendar.constant;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 
+/**
+ * Class containing all constants used at application level.
+ *
+ * @author DAMCO
+ *
+ */
 public class CalendarConstant {
 
     private CalendarConstant() {
@@ -43,8 +49,7 @@ public class CalendarConstant {
     public static final Format tableDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
 
     /**
-     * Temporary file location. We can improve code quality by putting this on
-     * resource folder
+     * Temporary file location.
      */
     public static final String DESTINATION_FILE_PATH = "C:\\calendar.xls";
 
