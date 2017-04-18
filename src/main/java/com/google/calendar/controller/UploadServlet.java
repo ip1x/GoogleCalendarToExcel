@@ -239,6 +239,14 @@ public class UploadServlet extends HttpServlet {
 	}
     }
 
+    /**
+     * Used to fetch CLIENT and PROJECT details from the calendar event.
+     * It also checks whether event is in valid format or not.
+     *
+     * @param summary
+     *            event title to be parsed for details.
+     * @return
+     */
     private Map<String, String> getProjecAndClientName(final String summary) {
 
 	final Map<String, String> map = new HashMap<>();
