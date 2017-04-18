@@ -1,6 +1,9 @@
 
 package com.google.calendar.controller;
 
+import static com.google.calendar.constant.CalendarConstant.CHAR_AT_THE_RATE;
+import static com.google.calendar.constant.CalendarConstant.CHAR_MODULUS;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -249,7 +253,7 @@ public class UploadServlet extends HttpServlet {
      */
     private Map<String, String> getProjecAndClientName(final String summary) {
 
-	final Map<String, String> map = new HashMap<>();
+	final Map<String, String> map = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
 	final String[] eventData = summary.split(" ");
 	String lastKey = "";
 	for (final String string : eventData) {
@@ -263,7 +267,7 @@ public class UploadServlet extends HttpServlet {
 		if ("".equals(keyValue[0])) {
 		    continue;
 		}
-		if ((keyValue[0].charAt(0) == '@') || (keyValue[0].charAt(0) == '%')) {
+		if ((keyValue[0].charAt(0) == CHAR_AT_THE_RATE) || (keyValue[0].charAt(0) == CHAR_MODULUS)) {
 		    if (keyValue[0].length() == 1) {
 			return new HashMap<>();
 		    }

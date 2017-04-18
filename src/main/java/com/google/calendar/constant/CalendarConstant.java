@@ -141,4 +141,16 @@ public class CalendarConstant {
 
     public static final Format TABLE_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm");
 
+    // Character constants
+
+    public static final char CHAR_MODULUS = '%';
+
+    public static final char CHAR_AT_THE_RATE = '@';
+
+    // Events Titles
+
+    public static final String CLI = "CLI";
+
+    public static final String PRJ = "PRJ";
+
 }

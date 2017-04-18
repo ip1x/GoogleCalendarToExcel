@@ -1,9 +1,15 @@
 package com.google.calendar.excel.output.impl;
 
 import static com.google.calendar.constant.CalendarConstant.ACT;
+import static com.google.calendar.constant.CalendarConstant.CHAR_AT_THE_RATE;
+import static com.google.calendar.constant.CalendarConstant.CHAR_MODULUS;
+import static com.google.calendar.constant.CalendarConstant.CLI;
 import static com.google.calendar.constant.CalendarConstant.CLIENTS;
+import static com.google.calendar.constant.CalendarConstant.COL_SPLITTER;
+import static com.google.calendar.constant.CalendarConstant.COMMA_SPLITTER;
 import static com.google.calendar.constant.CalendarConstant.ENDDATE;
 import static com.google.calendar.constant.CalendarConstant.FROM_HEADER;
+import static com.google.calendar.constant.CalendarConstant.PRJ;
 import static com.google.calendar.constant.CalendarConstant.PROJECTS;
 import static com.google.calendar.constant.CalendarConstant.STAFF;
 import static com.google.calendar.constant.CalendarConstant.STARTDATE;
@@ -47,7 +53,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     public final Logger logger = Logger.getLogger(ExcelServiceImpl.class);
 
-    GenerateOutputExcel generateOutputExcel;
+    private GenerateOutputExcel generateOutputExcel;
 
     /*
      * (non-Javadoc)
@@ -88,11 +94,11 @@ public class ExcelServiceImpl implements ExcelService {
 	    // Row number of table header
 	    final int headerRow = getStartHeader(sheet, columnSize, propertyMap);
 
-	    final Map<String, Map<String, String>> eventKeyValue = new HashMap<>();
+	    final Map<String, Map<String, String>> eventKeyValue = new HashMap<String, Map<String, String>>();
 	    for (final Map.Entry<String, List<DateTime>> entry : excelData.entrySet()) {
 		Map<String, String> eventDetails = new HashMap<>();
 		if (entry.getValue() == null) {
-		    eventDetails.put(ACT, entry.getKey());
+		    eventDetails.put(ACT.toLowerCase(), entry.getKey());
 		    eventKeyValue.put(entry.getKey(), eventDetails);
 		} else {
 
@@ -104,9 +110,9 @@ public class ExcelServiceImpl implements ExcelService {
 	    }
 
 	    // basic details of sheet
-	    setHeaderValue(sheet, getValueFromKeyAsString(eventKeyValue, "CLI"), userName,
-		    getValueFromKeyAsString(eventKeyValue, "PRJ"), dateList.get(0), dateList.get(1), headerRow,
-		    columnSize);
+	    setHeaderValue(sheet, getValueFromKeyAsString(eventKeyValue, CLI.toLowerCase()), userName,
+		    getValueFromKeyAsString(eventKeyValue, PRJ.toLowerCase()), dateList.get(0), dateList.get(1),
+		    headerRow, columnSize);
 
 	    // populate excel table with event details
 	    setColumnsValue(sheet, columnSize, headerRow, eventKeyValue, propertyMap);
@@ -149,15 +155,15 @@ public class ExcelServiceImpl implements ExcelService {
 	final String[] eventData = (entry.getKey()).split(" ");
 	String lastKey = "";
 	for (final String string : eventData) {
-	    final String[] keyValue = string.split(":");
+	    final String[] keyValue = string.split(COL_SPLITTER);
 	    if (keyValue != null && keyValue.length == 2) {
-		map.put(keyValue[0].trim(), keyValue[1].trim());
-		lastKey = keyValue[0].trim();
+		map.put(keyValue[0].trim().toLowerCase(), keyValue[1].trim());
+		lastKey = keyValue[0].trim().toLowerCase();
 	    } else if (keyValue.length == 1) {
 		if ("".equals(keyValue[0])) {
 		    continue;
 		}
-		if (keyValue[0].charAt(0) == '@' || keyValue[0].charAt(0) == '%') {
+		if (keyValue[0].charAt(0) == CHAR_AT_THE_RATE || keyValue[0].charAt(0) == CHAR_MODULUS) {
 		    map.put(Character.toString(keyValue[0].trim().charAt(0)),
 			    keyValue[0].trim().substring(1, keyValue[0].length()));
 		} else {
@@ -171,10 +177,13 @@ public class ExcelServiceImpl implements ExcelService {
 
 	final long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
 
-	map.put(ENDDATE, CalendarConstant.TABLE_DATE_FORMAT.format(new Date(entry.getValue().get(1).getValue())));
-	map.put(STARTDATE, CalendarConstant.TABLE_DATE_FORMAT.format(new Date(entry.getValue().get(0).getValue())));
-	map.put(STAFF, userName);
-	map.put(WORKEDHOURS, diffInMinutes / 60 + ":" + String.format("%02d", diffInMinutes % 60));
+	map.put(ENDDATE.toLowerCase(),
+		CalendarConstant.TABLE_DATE_FORMAT.format(new Date(entry.getValue().get(1).getValue())));
+	map.put(STARTDATE.toLowerCase(),
+		CalendarConstant.TABLE_DATE_FORMAT.format(new Date(entry.getValue().get(0).getValue())));
+	map.put(STAFF.toLowerCase(), userName);
+	map.put(WORKEDHOURS.toLowerCase(),
+		diffInMinutes / 60 + COL_SPLITTER + String.format("%02d", diffInMinutes % 60));
 
 	return map;
 
@@ -214,7 +223,8 @@ public class ExcelServiceImpl implements ExcelService {
 			    final Row valueRow = sheet.getRow(j++);
 			    if (valueRow != null) {
 				final Cell valueCell = valueRow.getCell(i);
-				valueCell.setCellValue((String) ((Map) entry.getValue()).get(propertyEntry.getKey()));
+				valueCell.setCellValue((String) ((Map) entry.getValue())
+					.get(propertyEntry.getKey().toString().toLowerCase()));
 			    }
 			}
 		    }
@@ -331,7 +341,7 @@ public class ExcelServiceImpl implements ExcelService {
 	    set.add(((Map<String, String>) entry.getValue()).get(name.trim()));
 	}
 	set.removeIf(Objects::isNull);
-	return Joiner.on(",").join(set);
+	return Joiner.on(COMMA_SPLITTER).join(set);
     }
 
 }
