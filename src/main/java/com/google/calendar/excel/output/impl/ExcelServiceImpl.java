@@ -171,8 +171,8 @@ public class ExcelServiceImpl implements ExcelService {
 
 	final long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
 
-	map.put(ENDDATE, CalendarConstant.tableDateFormat.format(new Date(entry.getValue().get(1).getValue())));
-	map.put(STARTDATE, CalendarConstant.tableDateFormat.format(new Date(entry.getValue().get(0).getValue())));
+	map.put(ENDDATE, CalendarConstant.TABLE_DATE_FORMAT.format(new Date(entry.getValue().get(1).getValue())));
+	map.put(STARTDATE, CalendarConstant.TABLE_DATE_FORMAT.format(new Date(entry.getValue().get(0).getValue())));
 	map.put(STAFF, userName);
 	map.put(WORKEDHOURS, diffInMinutes / 60 + ":" + String.format("%02d", diffInMinutes % 60));
 
@@ -267,12 +267,12 @@ public class ExcelServiceImpl implements ExcelService {
 
 			    case FROM_HEADER:
 				valueCell = row.getCell(j + 1);
-				valueCell.setCellValue(CalendarConstant.excelHeaderdateFormat.format(startDate));
+				valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(startDate));
 				break;
 
 			    case TO_HEADER:
 				valueCell = row.getCell(j + 1);
-				valueCell.setCellValue(CalendarConstant.excelHeaderdateFormat.format(endDate));
+				valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(endDate));
 				break;
 
 			    case CLIENTS:
