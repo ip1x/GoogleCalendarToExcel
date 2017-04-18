@@ -7,12 +7,11 @@ import java.text.SimpleDateFormat;
  * Class containing all constants used at application level.
  *
  * @author DAMCO
- *
  */
 public class CalendarConstant {
 
     private CalendarConstant() {
-	// default constructor
+        // default constructor
 
     }
 
@@ -71,13 +70,17 @@ public class CalendarConstant {
 
     public static final String ERROR_IN_PARSING_DATE = "Error in parsing Date";
 
-    public static final String ERROR_IN_READING_EXCEL = "Error in reading excel File";
+    public static final String ERROR_IN_READING_EXCEL =
+            "Error in reading excel File";
 
-    public static final String ERROR_IN_SCV_VALIDATION = "Error in CSV validation";
+    public static final String ERROR_IN_SCV_VALIDATION =
+            "Error in CSV validation";
 
-    public static final String ERROR_IN_FILE_SELECTION = "Please Select a valid file";
+    public static final String ERROR_IN_FILE_SELECTION =
+            "Please Select a valid file";
 
-    public static final String ERROR_IN_GOOGLE_AUTHENTICATION = "Google Authentication failed. Kindly provide valid json file";
+    public static final String ERROR_IN_GOOGLE_AUTHENTICATION =
+            "Google Authentication failed. Kindly provide valid json file";
 
     public static final String ERROR_NO_EVENT_FOUND = "No Events Found";
 
@@ -133,13 +136,16 @@ public class CalendarConstant {
 
     public static final String RESULT_FILE_NAME = "Results.xls";
 
-    public static final String CONFIGURATION_FILE_NAME = "configuration.properties";
+    public static final String CONFIGURATION_FILE_NAME =
+            "configuration.properties";
 
     // Date format for output file
 
-    public static final Format EXCEL_HEADER_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
+    public static final Format EXCEL_HEADER_DATE_FORMAT =
+            new SimpleDateFormat("MM/dd/yyyy");
 
-    public static final Format TABLE_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+    public static final Format TABLE_DATE_FORMAT =
+            new SimpleDateFormat("MM/dd/yyyy HH:mm");
 
     // Character constants
 
