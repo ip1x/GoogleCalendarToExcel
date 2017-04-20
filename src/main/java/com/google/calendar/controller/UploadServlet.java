@@ -3,6 +3,9 @@ package com.google.calendar.controller;
 
 import static com.google.calendar.constant.CalendarConstant.CHAR_AT_THE_RATE;
 import static com.google.calendar.constant.CalendarConstant.CHAR_MODULUS;
+import static com.google.calendar.constant.CalendarConstant.CLI;
+import static com.google.calendar.constant.CalendarConstant.COL_SPLITTER;
+import static com.google.calendar.constant.CalendarConstant.PRJ;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -144,8 +147,8 @@ public class UploadServlet extends HttpServlet {
 			    for (final Event event : items) {
 				try {
 				    final Map<String, String> summaryMap = getProjecAndClientName(event.getSummary());
-				    if ((clientName.contains(summaryMap.get("CLI").trim()) || clientName.isEmpty())
-					    && (projectName.contains(summaryMap.get("PRJ").trim())
+				    if ((clientName.contains(summaryMap.get(CLI).trim()) || clientName.isEmpty())
+					    && (projectName.contains(summaryMap.get(PRJ).trim())
 						    || projectName.isEmpty())) {
 					DateTime start = event.getStart().getDateTime();
 					DateTime end = event.getEnd().getDateTime();
@@ -257,7 +260,7 @@ public class UploadServlet extends HttpServlet {
 	final String[] eventData = summary.split(" ");
 	String lastKey = "";
 	for (final String string : eventData) {
-	    final String[] keyValue = string.split(":");
+	    final String[] keyValue = string.split(COL_SPLITTER);
 	    if (keyValue != null && keyValue.length == 2) {
 		map.put(keyValue[0].trim(), keyValue[1].trim());
 		lastKey = keyValue[0].trim();

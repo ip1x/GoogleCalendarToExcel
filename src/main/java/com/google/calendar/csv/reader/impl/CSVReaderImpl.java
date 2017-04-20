@@ -36,97 +36,108 @@ public class CSVReaderImpl implements CSVReader {
     /**
      * Return Map of input parameter taken from CSV file
      *
-     * @param request HttpServletRequest object with form parameter
+     * @param request
+     *            HttpServletRequest object with form parameter
      * @return Map of input parameter
      */
     @Override
-    public Map<String, String> readCSV(final HttpServletRequest request,
-            final HttpServletResponse response) {
+    public Map<String, String> readCSV(final HttpServletRequest request, final HttpServletResponse response) {
 
-        DiskFileItemFactory factory = new DiskFileItemFactory();
-        factory.setSizeThreshold(CalendarConstant.MAXMEMSIZE);
-        // Location to save data that is larger than maxMemSize.
-        factory.setRepository(new File(CalendarConstant.TEMP_STORAGE_LOCATION));
-        ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setSizeMax(CalendarConstant.MAXFILESIZE);
+	final DiskFileItemFactory factory = new DiskFileItemFactory();
+	factory.setSizeThreshold(CalendarConstant.MAXMEMSIZE);
+	// Location to save data that is larger than maxMemSize.
+	factory.setRepository(new File(CalendarConstant.TEMP_STORAGE_LOCATION));
+	final ServletFileUpload upload = new ServletFileUpload(factory);
+	upload.setSizeMax(CalendarConstant.MAXFILESIZE);
 
-        // Create input from CSV
+	// Create input from CSV
 
-        BufferedReader bufferReader = null;
-        String line = "";
+	BufferedReader bufferReader = null;
+	String line = "";
 
-        String lastKey = "";
-        Map<String, String> inputMap = new LinkedHashMap<>();
-      
-        try {
-            List fileItems = upload.parseRequest(request);
-            Iterator iterator = fileItems.iterator();
-            InputStream inputStream = null;
-            while (iterator.hasNext()) {
-                FileItem fileItem = (FileItem) iterator.next();
-                if (!fileItem.isFormField()) {
+	String lastKey = "";
+	final Map<String, String> inputMap = new LinkedHashMap<>();
 
-                    inputStream = fileItem.getInputStream();
+	try {
+	    final List fileItems = upload.parseRequest(request);
+	    final Iterator iterator = fileItems.iterator();
+	    InputStream inputStream = null;
+	    while (iterator.hasNext()) {
+		final FileItem fileItem = (FileItem) iterator.next();
+		if (!fileItem.isFormField()) {
 
-                } else {
-                    throw new FileNotFoundException();
-                }
-            }
+		    inputStream = fileItem.getInputStream();
 
-            bufferReader = new BufferedReader(
-                    new InputStreamReader(inputStream, "UTF-8"));
-            if ((line = bufferReader.readLine()) != null) {
+		} else {
+		    throw new FileNotFoundException();
+		}
+	    }
 
-                // use ',' as separator
-                String[] argument = line.split(CalendarConstant.COMMA_SPLITTER);
+	    bufferReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 
-                for (int j = 0; j < argument.length; j++) {
+	    // if ((line = bufferReader.readLine()) != null) {
+	    //
+	    // final String[] argument = line.split(" ");
+	    // for (final String string : argument) {
+	    // final String[] keyValue =
+	    // string.split(CalendarConstant.COL_SPLITTER,2);
+	    // if ((keyValue != null) && (keyValue.length == 2)) {
+	    // inputMap.put(keyValue[0].trim(), keyValue[1].trim());
+	    // lastKey = keyValue[0].trim();
+	    // }
+	    // if((keyValue != null) && (keyValue.length == 1)) {
+	    // inputMap.replace(lastKey, inputMap.get(lastKey).concat("
+	    // ").concat(keyValue[0].trim()));
+	    // }
+	    // }
+	    //
+	    // }
 
-                    // use : as separator
-                    String[] argArray =
-                            argument[j].split(CalendarConstant.COL_SPLITTER, 2);
+	    if ((line = bufferReader.readLine()) != null) {
 
-                    if (argArray.length == 1) {
-                        inputMap.replace(lastKey.trim(), inputMap.get(lastKey)
-                                .trim().concat("," + argArray[0]));
-                    } else {
-                        inputMap.put(argArray[0].trim(), argArray[1]);
-                        lastKey = argArray[0].trim();
-                    }
-                }
+		// use ',' as separator
+		final String[] argument = line.split(CalendarConstant.COMMA_SPLITTER);
 
-            } else {
+		for (final String element : argument) {
 
-                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
-                        CalendarConstant.ERROR_IN_FILE_SELECTION);
-                request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
-                        .forward(request, response);
-            }
+		    // use : as separator
+		    final String[] argArray = element.split(CalendarConstant.COL_SPLITTER, 2);
 
-        } catch (Exception e) {
+		    if (argArray.length == 1) {
+			inputMap.replace(lastKey.trim(), inputMap.get(lastKey).trim().concat("," + argArray[0]));
+		    } else {
+			inputMap.put(argArray[0].trim(), argArray[1]);
+			lastKey = argArray[0].trim();
+		    }
+		}
 
-            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
-            try {
-                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
-                        CalendarConstant.ERROR_IN_FILE_SELECTION);
-                request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
-                        .forward(request, response);
-            } catch (ServletException | IOException e1) {
-                logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
-                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
-                        CalendarConstant.ERROR_IN_LOADING);
-            }
-        } finally {
-            if (bufferReader != null) {
-                try {
-                    bufferReader.close();
-                } catch (IOException e) {
-                    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
-                }
-            }
-        }
+	    } else {
 
-        return inputMap;
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
+		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+	    }
+
+	} catch (final Exception e) {
+
+	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+	    try {
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
+		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+	    } catch (ServletException | IOException e1) {
+		logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
+	    }
+	} finally {
+	    if (bufferReader != null) {
+		try {
+		    bufferReader.close();
+		} catch (final IOException e) {
+		    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+		}
+	    }
+	}
+
+	return inputMap;
     }
 
 }

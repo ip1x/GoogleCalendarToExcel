@@ -15,7 +15,6 @@ import static com.google.calendar.constant.CalendarConstant.STAFF;
 import static com.google.calendar.constant.CalendarConstant.STARTDATE;
 import static com.google.calendar.constant.CalendarConstant.TO_HEADER;
 import static com.google.calendar.constant.CalendarConstant.USERS;
-import static com.google.calendar.constant.CalendarConstant.WORKEDHOURS;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -80,7 +79,7 @@ public class ExcelServiceImpl implements ExcelService {
 	    propertyMap.put(STARTDATE, STARTDATE);
 	    propertyMap.put(ENDDATE, ENDDATE);
 	    propertyMap.put(STAFF, STAFF);
-	    propertyMap.put(WORKEDHOURS, WORKEDHOURS);
+	    // propertyMap.put(WORKEDHOURS, WORKEDHOURS);
 
 	    // Create copy of supplied excel file to populate data in excel
 	    generateOutputExcel = new GenerateOutputExcel();
@@ -117,10 +116,15 @@ public class ExcelServiceImpl implements ExcelService {
 	    // populate excel table with event details
 	    setColumnsValue(sheet, columnSize, headerRow, eventKeyValue, propertyMap);
 
+	    // generateOutputExcel.getWorkbook().getCreationHelper().createFormulaEvaluator().evaluateAll();
+
+	    generateOutputExcel.getWorkbook().setForceFormulaRecalculation(true);
 	    // update the excel with updated sheet.
 	    outFile = new FileOutputStream(CalendarConstant.RESULT_FILE_NAME.equals(resultPath)
 		    ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
+	    // HSSFFormulaEvaluator.evaluateAllFormulaCells(generateOutputExcel.getWorkbook());
 	    generateOutputExcel.getWorkbook().write(outFile);
+	    // HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
 	    outFile.close();
 
 	} catch (final Exception e) {
@@ -182,8 +186,9 @@ public class ExcelServiceImpl implements ExcelService {
 	map.put(STARTDATE.toLowerCase(),
 		CalendarConstant.TABLE_DATE_FORMAT.format(new Date(entry.getValue().get(0).getValue())));
 	map.put(STAFF.toLowerCase(), userName);
-	map.put(WORKEDHOURS.toLowerCase(),
-		diffInMinutes / 60 + COL_SPLITTER + String.format("%02d", diffInMinutes % 60));
+	// map.put(WORKEDHOURS.toLowerCase(),
+	// diffInMinutes / 60 + COL_SPLITTER + String.format("%02d",
+	// diffInMinutes % 60));
 
 	return map;
 
