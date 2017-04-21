@@ -99,8 +99,6 @@ public class CalendarConstant {
 
     public static final String WORKEDHOURS = "Worked Hours";
 
-    public static final String ACT = "ACT";
-
     public static final String USERS = "Users";
 
     // String splitter
@@ -152,5 +150,11 @@ public class CalendarConstant {
     public static final String CLI = "CLI";
 
     public static final String PRJ = "PRJ";
+
+    public static final String TKT = "TKT";
+
+    public static final String WBS = "WBS";
+
+    public static final String ACT = "ACT";
 
 }

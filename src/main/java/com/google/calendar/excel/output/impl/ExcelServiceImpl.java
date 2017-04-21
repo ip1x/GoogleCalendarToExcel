@@ -1,11 +1,8 @@
 package com.google.calendar.excel.output.impl;
 
 import static com.google.calendar.constant.CalendarConstant.ACT;
-import static com.google.calendar.constant.CalendarConstant.CHAR_AT_THE_RATE;
-import static com.google.calendar.constant.CalendarConstant.CHAR_MODULUS;
 import static com.google.calendar.constant.CalendarConstant.CLI;
 import static com.google.calendar.constant.CalendarConstant.CLIENTS;
-import static com.google.calendar.constant.CalendarConstant.COL_SPLITTER;
 import static com.google.calendar.constant.CalendarConstant.COMMA_SPLITTER;
 import static com.google.calendar.constant.CalendarConstant.ENDDATE;
 import static com.google.calendar.constant.CalendarConstant.FROM_HEADER;
@@ -26,7 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -34,7 +30,6 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
-import com.google.api.client.util.DateTime;
 import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.excel.output.ExcelService;
 import com.google.calendar.exception.ExcelFormatException;
@@ -64,7 +59,7 @@ public class ExcelServiceImpl implements ExcelService {
      */
     @Override
     public void generateExcel(final String userName, final List<String> projectName, final List<String> clientName,
-	    final String templatePath, final String inOutPath, final Map<String, List<DateTime>> excelData,
+	    final String templatePath, final String inOutPath, final Map<String, Map<String, String>> excelData,
 	    final List<Date> dateList, final String resultPath) throws ExcelFormatException {
 
 	FileOutputStream outFile = null;
@@ -94,15 +89,15 @@ public class ExcelServiceImpl implements ExcelService {
 	    final int headerRow = getStartHeader(sheet, columnSize, propertyMap);
 
 	    final Map<String, Map<String, String>> eventKeyValue = new HashMap<String, Map<String, String>>();
-	    for (final Map.Entry<String, List<DateTime>> entry : excelData.entrySet()) {
-		Map<String, String> eventDetails = new HashMap<>();
+	    for (final Map.Entry<String, Map<String, String>> entry : excelData.entrySet()) {
+		final Map<String, String> eventDetails = new HashMap<>();
 		if (entry.getValue() == null) {
 		    eventDetails.put(ACT.toLowerCase(), entry.getKey());
 		    eventKeyValue.put(entry.getKey(), eventDetails);
 		} else {
 
-		    eventDetails = getDataFromEventName(entry, userName);
-		    eventKeyValue.put(entry.getKey(), eventDetails);
+		    // eventDetails = getDataFromEventName(entry, userName);
+		    eventKeyValue.put(entry.getKey(), entry.getValue());
 
 		}
 
@@ -143,56 +138,61 @@ public class ExcelServiceImpl implements ExcelService {
 
     }
 
-    /**
-     * Will convert event name into data field.
-     *
-     * @param entry
-     *            object for event name with date details
-     * @param userName
-     *            google user name
-     * @return Map with key value from event name
-     */
-    @Override
-    public Map<String, String> getDataFromEventName(final Entry<String, List<DateTime>> entry, final String userName) {
-	final Map<String, String> map = new HashMap<>();
-
-	final String[] eventData = (entry.getKey()).split(" ");
-	String lastKey = "";
-	for (final String string : eventData) {
-	    final String[] keyValue = string.split(COL_SPLITTER);
-	    if (keyValue != null && keyValue.length == 2) {
-		map.put(keyValue[0].trim().toLowerCase(), keyValue[1].trim());
-		lastKey = keyValue[0].trim().toLowerCase();
-	    } else if (keyValue.length == 1) {
-		if ("".equals(keyValue[0])) {
-		    continue;
-		}
-		if (keyValue[0].charAt(0) == CHAR_AT_THE_RATE || keyValue[0].charAt(0) == CHAR_MODULUS) {
-		    map.put(Character.toString(keyValue[0].trim().charAt(0)),
-			    keyValue[0].trim().substring(1, keyValue[0].length()));
-		} else {
-		    map.replace(lastKey, map.get(lastKey).concat(" ").concat(keyValue[0]));
-		}
-	    }
-	}
-
-	final long duration = new Date(entry.getValue().get(1).getValue()).getTime()
-		- new Date(entry.getValue().get(0).getValue()).getTime();
-
-	final long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
-
-	map.put(ENDDATE.toLowerCase(),
-		CalendarConstant.TABLE_DATE_FORMAT.format(new Date(entry.getValue().get(1).getValue())));
-	map.put(STARTDATE.toLowerCase(),
-		CalendarConstant.TABLE_DATE_FORMAT.format(new Date(entry.getValue().get(0).getValue())));
-	map.put(STAFF.toLowerCase(), userName);
-	// map.put(WORKEDHOURS.toLowerCase(),
-	// diffInMinutes / 60 + COL_SPLITTER + String.format("%02d",
-	// diffInMinutes % 60));
-
-	return map;
-
-    }
+    // /**
+    // * Will convert event name into data field.
+    // *
+    // * @param entry
+    // * object for event name with date details
+    // * @param userName
+    // * google user name
+    // * @return Map with key value from event name
+    // */
+    // @Override
+    // public Map<String, String> getDataFromEventName(final Entry<String,
+    // List<DateTime>> entry, final String userName) {
+    // final Map<String, String> map = new HashMap<>();
+    //
+    // final String[] eventData = (entry.getKey()).split(" ");
+    // String lastKey = "";
+    // for (final String string : eventData) {
+    // final String[] keyValue = string.split(COL_SPLITTER);
+    // if (keyValue != null && keyValue.length == 2) {
+    // map.put(keyValue[0].trim().toLowerCase(), keyValue[1].trim());
+    // lastKey = keyValue[0].trim().toLowerCase();
+    // } else if (keyValue.length == 1) {
+    // if ("".equals(keyValue[0])) {
+    // continue;
+    // }
+    // if (keyValue[0].charAt(0) == CHAR_AT_THE_RATE || keyValue[0].charAt(0) ==
+    // CHAR_MODULUS) {
+    // map.put(Character.toString(keyValue[0].trim().charAt(0)),
+    // keyValue[0].trim().substring(1, keyValue[0].length()));
+    // } else {
+    // map.replace(lastKey, map.get(lastKey).concat(" ").concat(keyValue[0]));
+    // }
+    // }
+    // }
+    //
+    // final long duration = new
+    // Date(entry.getValue().get(1).getValue()).getTime()
+    // - new Date(entry.getValue().get(0).getValue()).getTime();
+    //
+    // final long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
+    //
+    // map.put(ENDDATE.toLowerCase(),
+    // CalendarConstant.TABLE_DATE_FORMAT.format(new
+    // Date(entry.getValue().get(1).getValue())));
+    // map.put(STARTDATE.toLowerCase(),
+    // CalendarConstant.TABLE_DATE_FORMAT.format(new
+    // Date(entry.getValue().get(0).getValue())));
+    // map.put(STAFF.toLowerCase(), userName);
+    // // map.put(WORKEDHOURS.toLowerCase(),
+    // // diffInMinutes / 60 + COL_SPLITTER + String.format("%02d",
+    // // diffInMinutes % 60));
+    //
+    // return map;
+    //
+    // }
 
     /**
      * Will set event details in excel table

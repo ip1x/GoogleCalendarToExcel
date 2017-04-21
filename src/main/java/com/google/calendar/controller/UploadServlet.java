@@ -1,10 +1,7 @@
 
 package com.google.calendar.controller;
 
-import static com.google.calendar.constant.CalendarConstant.CHAR_AT_THE_RATE;
-import static com.google.calendar.constant.CalendarConstant.CHAR_MODULUS;
 import static com.google.calendar.constant.CalendarConstant.CLI;
-import static com.google.calendar.constant.CalendarConstant.COL_SPLITTER;
 import static com.google.calendar.constant.CalendarConstant.PRJ;
 
 import java.io.File;
@@ -21,7 +18,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -44,6 +40,7 @@ import com.google.calendar.excel.output.ExcelService;
 import com.google.calendar.exception.ExcelFormatException;
 import com.google.calendar.factory.ServiceFactory;
 import com.google.calendar.service.CalendarService;
+import com.google.calendar.util.EventTitleParser;
 
 /**
  * Controller class to Handle incoming request. This servlet reads CSV file as
@@ -126,7 +123,7 @@ public class UploadServlet extends HttpServlet {
 	    final CalendarService calendarService = (CalendarService) ServiceFactory.getInstance(CalendarService.class);
 	    final Calendar service = calendarService.getCalendarService(request, response);
 
-	    final Map<String, List<DateTime>> excelData = new HashMap<>();
+	    final Map<String, Map<String, String>> excelData = new HashMap<>();
 	    String userName = "";
 	    String pageToken = null;
 
@@ -144,29 +141,42 @@ public class UploadServlet extends HttpServlet {
 
 			} else {
 			    userName = items.get(0).getCreator().getDisplayName();
+			    final EventTitleParser eventTitleParser = new EventTitleParser();
 			    for (final Event event : items) {
 				try {
-				    final Map<String, String> summaryMap = getProjecAndClientName(event.getSummary());
-				    if ((clientName.contains(summaryMap.get(CLI).trim()) || clientName.isEmpty())
-					    && (projectName.contains(summaryMap.get(PRJ).trim())
+				    final Map<String, Map<String, String>> eventKeyValue = eventTitleParser
+					    .generateMapForEvents(event, userName);
+				    final String eventSummary = event.getSummary();
+				    if ((clientName
+					    .contains(eventKeyValue.get(eventSummary).get(CLI.toLowerCase()).trim())
+					    || clientName.isEmpty())
+					    && (projectName.contains(
+						    eventKeyValue.get(eventSummary).get(PRJ.toLowerCase()).trim())
 						    || projectName.isEmpty())) {
-					DateTime start = event.getStart().getDateTime();
-					DateTime end = event.getEnd().getDateTime();
 
-					if (start == null) {
-					    start = event.getStart().getDate();
-					}
-					if (end == null) {
-					    end = event.getEnd().getDate();
-					}
+					excelData.put(eventSummary, eventKeyValue.get(eventSummary));
+					firstEvent = event;
+					// DateTime start =
+					// event.getStart().getDateTime();
+					// DateTime end =
+					// event.getEnd().getDateTime();
+					//
+					// if (start == null) {
+					// start = event.getStart().getDate();
+					// }
+					// if (end == null) {
+					// end = event.getEnd().getDate();
+					// }
 					// Index 0 has start date and index 1
 					// has
 					// end date in dateList.
-					final List<DateTime> dateList = new LinkedList<>();
-					dateList.add(start);
-					dateList.add(end);
-					firstEvent = event;
-					excelData.put(event.getSummary(), dateList);
+					// final List<DateTime> dateList = new
+					// LinkedList<>();
+					// dateList.add(start);
+					// dateList.add(end);
+					//
+					// excelData.put(event.getSummary(),
+					// dateList);
 
 				    }
 				} catch (final Exception e) {
@@ -246,41 +256,45 @@ public class UploadServlet extends HttpServlet {
 	}
     }
 
-    /**
-     * Used to fetch CLIENT and PROJECT details from the calendar event.
-     * It also checks whether event is in valid format or not.
-     *
-     * @param summary
-     *            event title to be parsed for details.
-     * @return
-     */
-    private Map<String, String> getProjecAndClientName(final String summary) {
-
-	final Map<String, String> map = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-	final String[] eventData = summary.split(" ");
-	String lastKey = "";
-	for (final String string : eventData) {
-	    final String[] keyValue = string.split(COL_SPLITTER);
-	    if (keyValue != null && keyValue.length == 2) {
-		map.put(keyValue[0].trim(), keyValue[1].trim());
-		lastKey = keyValue[0].trim();
-	    } else if (keyValue.length == 3) {
-		return new HashMap<>();
-	    } else if (keyValue.length == 1 && !"".equals(lastKey)) {
-		if ("".equals(keyValue[0])) {
-		    continue;
-		}
-		if ((keyValue[0].charAt(0) == CHAR_AT_THE_RATE) || (keyValue[0].charAt(0) == CHAR_MODULUS)) {
-		    if (keyValue[0].length() == 1) {
-			return new HashMap<>();
-		    }
-		    lastKey = "";
-		} else {
-		    map.replace(lastKey, map.get(lastKey).concat(" ").concat(keyValue[0].trim()));
-		}
-	    }
-	}
-	return map;
-    }
-
+    // /**
+    // * Used to fetch CLIENT and PROJECT details from the calendar event.
+    // * It also checks whether event is in valid format or not.
+    // *
+    // * @param summary
+    // * event title to be parsed for details.
+    // * @return
+    // */
+    // private Map<String, String> getProjecAndClientName(final String summary)
+    // {
+    //
+    // final Map<String, String> map = new TreeMap<String,
+    // String>(String.CASE_INSENSITIVE_ORDER);
+    // final String[] eventData = summary.split(" ");
+    // String lastKey = "";
+    // for (final String string : eventData) {
+    // final String[] keyValue = string.split(COL_SPLITTER);
+    // if (keyValue != null && keyValue.length == 2) {
+    // map.put(keyValue[0].trim(), keyValue[1].trim());
+    // lastKey = keyValue[0].trim();
+    // } else if (keyValue.length == 3) {
+    // return new HashMap<>();
+    // } else if (keyValue.length == 1 && !"".equals(lastKey)) {
+    // if ("".equals(keyValue[0])) {
+    // continue;
+    // }
+    // if ((keyValue[0].charAt(0) == CHAR_AT_THE_RATE) || (keyValue[0].charAt(0)
+    // == CHAR_MODULUS)) {
+    // if (keyValue[0].length() == 1) {
+    // return new HashMap<>();
+    // }
+    // lastKey = "";
+    // } else {
+    // map.replace(lastKey, map.get(lastKey).concat("
+    // ").concat(keyValue[0].trim()));
+    // }
+    // }
+    // }
+    // return map;
+    // }
+    //
 }
