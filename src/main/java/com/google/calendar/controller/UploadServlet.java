@@ -38,6 +38,7 @@ import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.csv.reader.CSVReader;
 import com.google.calendar.excel.output.ExcelService;
 import com.google.calendar.exception.ExcelFormatException;
+import com.google.calendar.exception.InvalidEventException;
 import com.google.calendar.factory.ServiceFactory;
 import com.google.calendar.service.CalendarService;
 import com.google.calendar.util.EventTitleParser;
@@ -144,41 +145,8 @@ public class UploadServlet extends HttpServlet {
 			    final EventTitleParser eventTitleParser = new EventTitleParser();
 			    for (final Event event : items) {
 				try {
-				    final Map<String, Map<String, String>> eventKeyValue = eventTitleParser
-					    .generateMapForEvents(event, userName);
-				    final String eventSummary = event.getSummary();
-				    if ((clientName
-					    .contains(eventKeyValue.get(eventSummary).get(CLI.toLowerCase()).trim())
-					    || clientName.isEmpty())
-					    && (projectName.contains(
-						    eventKeyValue.get(eventSummary).get(PRJ.toLowerCase()).trim())
-						    || projectName.isEmpty())) {
-
-					excelData.put(eventSummary, eventKeyValue.get(eventSummary));
-					firstEvent = event;
-					// DateTime start =
-					// event.getStart().getDateTime();
-					// DateTime end =
-					// event.getEnd().getDateTime();
-					//
-					// if (start == null) {
-					// start = event.getStart().getDate();
-					// }
-					// if (end == null) {
-					// end = event.getEnd().getDate();
-					// }
-					// Index 0 has start date and index 1
-					// has
-					// end date in dateList.
-					// final List<DateTime> dateList = new
-					// LinkedList<>();
-					// dateList.add(start);
-					// dateList.add(end);
-					//
-					// excelData.put(event.getSummary(),
-					// dateList);
-
-				    }
+				    firstEvent = parsingEvents(firstEvent, projectName, clientName, excelData, userName, eventTitleParser,
+							event);
 				} catch (final Exception e) {
 				    logger.info("Event with uncompiled name is found");
 				    excelData.put(event.getSummary(), null);
@@ -255,6 +223,47 @@ public class UploadServlet extends HttpServlet {
 	    }
 	}
     }
+
+	private Event parsingEvents(Event firstEvent, final List<String> projectName, final List<String> clientName,
+			final Map<String, Map<String, String>> excelData, String userName, final EventTitleParser eventTitleParser,
+			final Event event) throws InvalidEventException {
+		final Map<String, Map<String, String>> eventKeyValue = eventTitleParser
+		    .generateMapForEvents(event, userName);
+		final String eventSummary = event.getSummary();
+		if ((clientName
+		    .contains(eventKeyValue.get(eventSummary).get(CLI.toLowerCase()).trim())
+		    || clientName.isEmpty())
+		    && (projectName.contains(
+			    eventKeyValue.get(eventSummary).get(PRJ.toLowerCase()).trim())
+			    || projectName.isEmpty())) {
+
+		excelData.put(eventSummary, eventKeyValue.get(eventSummary));
+		firstEvent = event;
+		// DateTime start =
+		// event.getStart().getDateTime();
+		// DateTime end =
+		// event.getEnd().getDateTime();
+		//
+		// if (start == null) {
+		// start = event.getStart().getDate();
+		// }
+		// if (end == null) {
+		// end = event.getEnd().getDate();
+		// }
+		// Index 0 has start date and index 1
+		// has
+		// end date in dateList.
+		// final List<DateTime> dateList = new
+		// LinkedList<>();
+		// dateList.add(start);
+		// dateList.add(end);
+		//
+		// excelData.put(event.getSummary(),
+		// dateList);
+
+		}
+		return firstEvent;
+	}
 
     // /**
     // * Used to fetch CLIENT and PROJECT details from the calendar event.
