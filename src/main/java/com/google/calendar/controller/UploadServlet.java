@@ -58,12 +58,6 @@ public class UploadServlet extends HttpServlet {
 
     public final Logger logger = Logger.getLogger(UploadServlet.class);
 
-    /**
-     * Servlet post method to handle incoming post request (non-Javadoc)
-     *
-     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse)
-     */
     /*
      * (non-Javadoc)
      *
@@ -145,8 +139,8 @@ public class UploadServlet extends HttpServlet {
 			    final EventTitleParser eventTitleParser = new EventTitleParser();
 			    for (final Event event : items) {
 				try {
-				    firstEvent = parsingEvents(firstEvent, projectName, clientName, excelData, userName, eventTitleParser,
-							event);
+				    firstEvent = parsingEvents(firstEvent, projectName, clientName, excelData, userName,
+					    eventTitleParser, event);
 				} catch (final Exception e) {
 				    logger.info("Event with uncompiled name is found");
 				    excelData.put(event.getSummary(), null);
@@ -224,46 +218,66 @@ public class UploadServlet extends HttpServlet {
 	}
     }
 
-	private Event parsingEvents(Event firstEvent, final List<String> projectName, final List<String> clientName,
-			final Map<String, Map<String, String>> excelData, String userName, final EventTitleParser eventTitleParser,
-			final Event event) throws InvalidEventException {
-		final Map<String, Map<String, String>> eventKeyValue = eventTitleParser
-		    .generateMapForEvents(event, userName);
-		final String eventSummary = event.getSummary();
-		if ((clientName
-		    .contains(eventKeyValue.get(eventSummary).get(CLI.toLowerCase()).trim())
-		    || clientName.isEmpty())
-		    && (projectName.contains(
-			    eventKeyValue.get(eventSummary).get(PRJ.toLowerCase()).trim())
-			    || projectName.isEmpty())) {
+    /**
+     * This method checks whether the event passed
+     * "Has to be added to output file or not"
+     * if YES then is added to another Map.
+     * Otherwise not.
+     *
+     * @param firstEvent
+     *            used to check whether we have a single event or not.
+     * @param projectName
+     *            name of project for which output file is to be created
+     * @param clientName
+     *            name of client for which output file is to be created
+     * @param excelData
+     *            empty map which will contain event and its key-value pair
+     * @param userName
+     *            google account user name
+     * @param eventTitleParser
+     *            object containing method to generate map containing event and
+     *            its key-value par
+     * @param event
+     *            event to be checked for adding to excel output file
+     * @return
+     * @throws InvalidEventException
+     */
+    private Event parsingEvents(Event firstEvent, final List<String> projectName, final List<String> clientName,
+	    final Map<String, Map<String, String>> excelData, final String userName,
+	    final EventTitleParser eventTitleParser, final Event event) throws InvalidEventException {
+	final Map<String, Map<String, String>> eventKeyValue = eventTitleParser.generateMapForEvents(event, userName);
+	final String eventSummary = event.getSummary();
+	if ((clientName.contains(eventKeyValue.get(eventSummary).get(CLI.toLowerCase()).trim()) || clientName.isEmpty())
+		&& (projectName.contains(eventKeyValue.get(eventSummary).get(PRJ.toLowerCase()).trim())
+			|| projectName.isEmpty())) {
 
-		excelData.put(eventSummary, eventKeyValue.get(eventSummary));
-		firstEvent = event;
-		// DateTime start =
-		// event.getStart().getDateTime();
-		// DateTime end =
-		// event.getEnd().getDateTime();
-		//
-		// if (start == null) {
-		// start = event.getStart().getDate();
-		// }
-		// if (end == null) {
-		// end = event.getEnd().getDate();
-		// }
-		// Index 0 has start date and index 1
-		// has
-		// end date in dateList.
-		// final List<DateTime> dateList = new
-		// LinkedList<>();
-		// dateList.add(start);
-		// dateList.add(end);
-		//
-		// excelData.put(event.getSummary(),
-		// dateList);
+	    excelData.put(eventSummary, eventKeyValue.get(eventSummary));
+	    firstEvent = event;
+	    // DateTime start =
+	    // event.getStart().getDateTime();
+	    // DateTime end =
+	    // event.getEnd().getDateTime();
+	    //
+	    // if (start == null) {
+	    // start = event.getStart().getDate();
+	    // }
+	    // if (end == null) {
+	    // end = event.getEnd().getDate();
+	    // }
+	    // Index 0 has start date and index 1
+	    // has
+	    // end date in dateList.
+	    // final List<DateTime> dateList = new
+	    // LinkedList<>();
+	    // dateList.add(start);
+	    // dateList.add(end);
+	    //
+	    // excelData.put(event.getSummary(),
+	    // dateList);
 
-		}
-		return firstEvent;
 	}
+	return firstEvent;
+    }
 
     // /**
     // * Used to fetch CLIENT and PROJECT details from the calendar event.
