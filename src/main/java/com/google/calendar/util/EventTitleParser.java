@@ -15,7 +15,6 @@ import static com.google.calendar.constant.CalendarConstant.WBS;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.google.api.services.calendar.model.Event;
@@ -110,26 +109,47 @@ public class EventTitleParser {
     @SuppressWarnings("rawtypes")
     private static Map<String, Map<String, String>> CheckValidityOfEvent(final Event event, final String userName,
 	    final Map<String, String> map) throws InvalidEventException {
-	final Iterator it = map.entrySet().iterator();
 	boolean invalid = false;
-	while (it.hasNext()) {
-	    final Map.Entry pair = (Map.Entry) it.next();
+	for (final Map.Entry<String, String> entry : map.entrySet()) {
 	    // TODO: Needs to modify code for lowercase
-	    switch (pair.getKey().toString().toUpperCase()) {
+	    switch (entry.getKey().toString().toUpperCase()) {
 		case TKT:
 		case WBS:
 		case CLI:
 		case PRJ:
 		case ACT:
 		case "" + CHAR_AT_THE_RATE:
+		    break;
 		case "" + CHAR_MODULUS:
+		    entry.setValue(entry.getValue() + "%");
 		    break;
 		default:
 		    invalid = true;
 		    break;
 	    }
-	    // System.out.println(pair.getKey() + " = " + pair.getValue());
+	    // System.out.println(entry.getKey() + " = " + entry.getValue());
 	}
+
+	// final Iterator it = map.entrySet().iterator();
+	// boolean invalid = false;
+	// while (it.hasNext()) {
+	// final Map.Entry pair = (Map.Entry) it.next();
+	// // TODO: Needs to modify code for lowercase
+	// switch (pair.getKey().toString().toUpperCase()) {
+	// case TKT:
+	// case WBS:
+	// case CLI:
+	// case PRJ:
+	// case ACT:
+	// case "" + CHAR_AT_THE_RATE:
+	// case "" + CHAR_MODULUS:
+	// break;
+	// default:
+	// invalid = true;
+	// break;
+	// }
+	// // System.out.println(pair.getKey() + " = " + pair.getValue());
+	// }
 	if (invalid || map.values().contains(null)) {
 	    throw new InvalidEventException();
 	} else {
