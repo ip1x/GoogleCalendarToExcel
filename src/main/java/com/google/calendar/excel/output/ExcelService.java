@@ -15,6 +15,10 @@ import com.google.calendar.exception.ExcelFormatException;
 public interface ExcelService {
 
     /**
+     * Used to copy template file to a temporary location, then populating the
+     * copied file with required date of events.
+     *
+     *
      * @param userName
      *            google user name
      * @param projectName

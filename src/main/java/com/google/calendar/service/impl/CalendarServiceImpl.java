@@ -28,22 +28,27 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.service.CalendarService;
 
+/**
+ * Class used to fetch calendar events for a calendar using the auth 2.0 type
+ * authentication.
+ *
+ * @author DAMCO
+ *
+ */
 public class CalendarServiceImpl implements CalendarService {
 
     /** Application name. */
     private static final String APPLICATION_NAME = "Google Calendar Sample";
 
     /** Directory to store user credentials for this application. */
-    private static final File DATA_STORE_DIR =
-            new File(System.getProperty("user.home"),
-                    ".credentials/calendar-java-quickstart");
+    private static final File DATA_STORE_DIR = new File(System.getProperty("user.home"),
+	    ".credentials/calendar-java-quickstart");
 
     /** Global instance of the {@link FileDataStoreFactory}. */
     private static FileDataStoreFactory DATA_STORE_FACTORY;
 
     /** Global instance of the JSON factory. */
-    private static final JsonFactory JSON_FACTORY =
-            JacksonFactory.getDefaultInstance();
+    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
     /** Global instance of the HTTP transport. */
     private static HttpTransport HTTP_TRANSPORT;
@@ -55,75 +60,69 @@ public class CalendarServiceImpl implements CalendarService {
      * these scopes, delete your previously saved credentials at
      * ~/.credentials/calendar-java-quickstart
      */
-    private static final List<String> SCOPES =
-            Arrays.asList(CalendarScopes.CALENDAR_READONLY);
+    private static final List<String> SCOPES = Arrays.asList(CalendarScopes.CALENDAR_READONLY);
 
     // Default constrctor
     public CalendarServiceImpl() {
-        super();
-        try {
-            HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
-        } catch (final Exception t) {
-            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, t);
-            System.exit(1);
-        }
+	super();
+	try {
+	    HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+	    DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+	} catch (final Exception t) {
+	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, t);
+	    System.exit(1);
+	}
     }
 
-    /**
-     * Build and return an authorized Calendar client service.
-     *
-     * @return an authorized Calendar client service
-     * @throws IOException
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.google.calendar.service.CalendarService#getCalendarService(javax.
+     * servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     @Override
-    public Calendar getCalendarService(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException {
-        final Credential credential = authorize(request, response);
-        return new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-                .setApplicationName(APPLICATION_NAME).build();
+    public Calendar getCalendarService(final HttpServletRequest request, final HttpServletResponse response)
+	    throws IOException {
+	final Credential credential = authorize(request, response);
+	return new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME)
+		.build();
     }
 
     /**
      * Creates an authorized Credential object.
      *
+     * @param request
+     *            HttpServletRequest object with form parameter
+     * @param response
+     *            HttpServletResponse object
      * @return an authorized Credential object.
-     * @throws IOException
      */
-    public Credential authorize(final HttpServletRequest request,
-            final HttpServletResponse response) {
-        try {
-            // Load client secrets.
-            InputStream in = getClass().getClassLoader()
-                    .getResourceAsStream("client_secret.json");
-            final GoogleClientSecrets clientSecrets = GoogleClientSecrets
-                    .load(JSON_FACTORY, new InputStreamReader(in));
+    public Credential authorize(final HttpServletRequest request, final HttpServletResponse response) {
+	try {
+	    // Load client secrets.
+	    final InputStream in = getClass().getClassLoader().getResourceAsStream("client_secret.json");
+	    final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
-            // Build flow and trigger user authorization request.
-            final GoogleAuthorizationCodeFlow flow =
-                    new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
-                            JSON_FACTORY, clientSecrets, SCOPES)
-                                    .setDataStoreFactory(DATA_STORE_FACTORY)
-                                    .setAccessType("offline").build();
-            return new AuthorizationCodeInstalledApp(flow,
-                    new LocalServerReceiver()).authorize("user");
+	    // Build flow and trigger user authorization request.
+	    final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
+		    JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY)
+			    .setAccessType("offline").build();
+	    return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
 
-        } catch (Exception e) {
-            logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
-            try {
-                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
-                        CalendarConstant.ERROR_IN_GOOGLE_AUTHENTICATION);
-                request.getRequestDispatcher(CalendarConstant.HOME_PAGE)
-                        .forward(request, response);
-            } catch (ServletException | IOException e1) {
-                logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
-                request.setAttribute(CalendarConstant.ERROR_MESSAGE,
-                        CalendarConstant.ERROR_IN_LOADING);
+	} catch (final Exception e) {
+	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+	    try {
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_GOOGLE_AUTHENTICATION);
+		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+	    } catch (ServletException | IOException e1) {
+		logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
 
-            }
+	    }
 
-        }
-        return null;
+	}
+	return null;
     }
 
 }
