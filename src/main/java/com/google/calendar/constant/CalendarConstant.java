@@ -137,7 +137,7 @@ public class CalendarConstant {
 
     public static final Format EXCEL_HEADER_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
 
-    public static final Format TABLE_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+    public static final Format TABLE_DATE_FORMAT = new SimpleDateFormat("M/dd/yy HH:mm");
 
     // Character constants
 
@@ -156,5 +156,9 @@ public class CalendarConstant {
     public static final String WBS = "WBS";
 
     public static final String ACT = "ACT";
+
+    // Event Parser Regex
+
+    public static final String EVENT_PARSER_REGEX = "(?<=\\G(\\w+(?!\\w+)|:|CLI:|PRJ:|ACT:|TKT:|WBS:|@|%))\\s*";
 
 }

@@ -114,6 +114,11 @@ public class ExcelServiceImpl implements ExcelService {
 	    // generateOutputExcel.getWorkbook().getCreationHelper().createFormulaEvaluator().evaluateAll();
 
 	    generateOutputExcel.getWorkbook().setForceFormulaRecalculation(true);
+
+	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
+		generateOutputExcel.getSheet().autoSizeColumn(columnIndex);
+	    }
+
 	    // update the excel with updated sheet.
 	    outFile = new FileOutputStream(CalendarConstant.RESULT_FILE_NAME.equals(resultPath)
 		    ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
