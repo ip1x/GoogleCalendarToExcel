@@ -21,6 +21,12 @@ import com.google.api.services.calendar.model.Event;
 import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.exception.InvalidEventException;
 
+/**
+ * This class is used to make key-value pair for events.
+ *
+ * @author User
+ *
+ */
 public class EventTitleParser {
 
     // public static void main(final String[] args) {
