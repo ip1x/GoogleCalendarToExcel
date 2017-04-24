@@ -33,12 +33,11 @@ public class CSVReaderImpl implements CSVReader {
 
     public final Logger logger = Logger.getLogger(CSVReaderImpl.class);
 
-    /**
-     * Return Map of input parameter taken from CSV file
-     *
-     * @param request
-     *            HttpServletRequest object with form parameter
-     * @return Map of input parameter
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.google.calendar.csv.reader.CSVReader#readCSV(javax.servlet.http.
+     * HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     @Override
     public Map<String, String> readCSV(final HttpServletRequest request, final HttpServletResponse response) {

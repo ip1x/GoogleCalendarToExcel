@@ -15,10 +15,12 @@ public interface CSVReader {
     /**
      * Return Map of input parameter taken from CSV file
      *
-     * @param request HttpServletRequest object with form parameter
+     * @param request
+     *            HttpServletRequest object with form parameter
+     * @param response
+     *            HttpServletresponse object
      * @return Map of input parameter
      */
-    public Map<String, String> readCSV(final HttpServletRequest request,
-            HttpServletResponse response);
+    public Map<String, String> readCSV(final HttpServletRequest request, final HttpServletResponse response);
 
 }

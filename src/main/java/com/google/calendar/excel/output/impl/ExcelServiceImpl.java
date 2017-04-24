@@ -115,11 +115,6 @@ public class ExcelServiceImpl implements ExcelService {
 
 	    generateOutputExcel.getWorkbook().setForceFormulaRecalculation(true);
 
-	    // auto width setting for column of output file
-	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
-		generateOutputExcel.getSheet().autoSizeColumn(columnIndex);
-	    }
-
 	    // update the excel with updated sheet.
 	    outFile = new FileOutputStream(CalendarConstant.RESULT_FILE_NAME.equals(resultPath)
 		    ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
@@ -207,7 +202,7 @@ public class ExcelServiceImpl implements ExcelService {
      *            Excel sheet
      * @param columnSize
      *            maximum column to iterate
-     * @param headerRow
+     * @param headerRowNo
      *            row number where header will find
      * @param excelData
      *            Event details of user
@@ -219,26 +214,29 @@ public class ExcelServiceImpl implements ExcelService {
 	final int lastRowSize = headerRowNo + excelData.size();
 	final Row headerRow = sheet.getRow(headerRowNo);
 	for (final Entry propertyEntry : propertyMap.entrySet()) {
-	    for (int i = 0; i < columnSize; i++) {
+	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 
-		final Cell hearderCell = headerRow.getCell(i);
+		final Cell hearderCell = headerRow.getCell(columnIndex);
 		if (hearderCell != null) {
 		    hearderCell.setCellType(CellType.STRING);
 		}
 
 		if (hearderCell != null && hearderCell.getStringCellValue().trim()
 			.equalsIgnoreCase((String) propertyEntry.getValue())) {
-		    for (int j = headerRowNo + 1; j <= lastRowSize; j++) {
+		    for (int rowIndex = headerRowNo + 1; rowIndex <= lastRowSize; rowIndex++) {
 
 			for (final Entry entry : excelData.entrySet()) {
-			    final Row valueRow = sheet.getRow(j++);
+			    final Row valueRow = sheet.getRow(rowIndex++);
 			    if (valueRow != null) {
-				final Cell valueCell = valueRow.getCell(i);
-				valueCell.setCellValue((String) ((Map) entry.getValue())
+				final Cell cell = valueRow.getCell(columnIndex);
+				cell.setCellValue((String) ((Map) entry.getValue())
 					.get(propertyEntry.getKey().toString().toLowerCase()));
 			    }
 			}
 		    }
+
+		    // auto width setting for column of output file
+		    generateOutputExcel.getSheet().autoSizeColumn(columnIndex);
 		}
 	    }
 	}
@@ -268,11 +266,11 @@ public class ExcelServiceImpl implements ExcelService {
     private void setHeaderValue(final Sheet sheet, final String clientName, final String userName,
 	    final String projectNames, final Date startDate, final Date endDate, final int headerRow,
 	    final int columnSize) {
-	for (int i = 0; i < headerRow; i++) {
-	    for (int j = 0; j < columnSize; j++) {
-		final Row row = sheet.getRow(i);
+	for (int rowIndex = 0; rowIndex < headerRow; rowIndex++) {
+	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
+		final Row row = sheet.getRow(rowIndex);
 		if (row != null) {
-		    final Cell cell = row.getCell(j);
+		    final Cell cell = row.getCell(columnIndex);
 
 		    if (cell != null) {
 			cell.setCellType(CellType.STRING);
@@ -282,26 +280,26 @@ public class ExcelServiceImpl implements ExcelService {
 		    if (cell != null && cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
 			switch (cell.getStringCellValue().trim()) {
 			    case USERS:
-				valueCell = row.getCell(j + 1);
+				valueCell = row.getCell(columnIndex + 1);
 				valueCell.setCellValue(userName);
 				break;
 
 			    case FROM_HEADER:
-				valueCell = row.getCell(j + 1);
+				valueCell = row.getCell(columnIndex + 1);
 				valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(startDate));
 				break;
 
 			    case TO_HEADER:
-				valueCell = row.getCell(j + 1);
+				valueCell = row.getCell(columnIndex + 1);
 				valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(endDate));
 				break;
 
 			    case CLIENTS:
-				valueCell = row.getCell(j + 1);
+				valueCell = row.getCell(columnIndex + 1);
 				valueCell.setCellValue(clientName);
 				break;
 			    case PROJECTS:
-				valueCell = row.getCell(j + 1);
+				valueCell = row.getCell(columnIndex + 1);
 				valueCell.setCellValue(projectNames);
 				break;
 
@@ -321,17 +319,18 @@ public class ExcelServiceImpl implements ExcelService {
      *            Excel sheet
      * @param columnSize
      *            max column size
+     * @param inputMap
      * @return row number
      */
     private int getStartHeader(final Sheet sheet, final int columnSize, final Map<String, String> inputMap) {
-	for (int i = 0; true; i++) {
-	    for (int j = 0; j < columnSize; j++) {
-		final Row row = sheet.getRow(i);
+	for (int rowIndex = 0; true; rowIndex++) {
+	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
+		final Row row = sheet.getRow(rowIndex);
 		if (row != null) {
-		    final Cell cell = row.getCell(j);
+		    final Cell cell = row.getCell(columnIndex);
 		    if (cell != null && cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()
 			    && inputMap.values().contains(cell.getStringCellValue().trim())) {
-			return i;
+			return rowIndex;
 		    }
 		}
 	    }
@@ -339,17 +338,19 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     /**
-     * Convert list into comma sepertaed string
+     * Convert event key-value list into comma separated value
+     * for the "eventKey" provided
      *
-     * @param clients
+     * @param keyValue
+     * @param eventKey
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private String getValueFromKeyAsString(final Map<String, Map<String, String>> keyValue, final String name) {
+    private String getValueFromKeyAsString(final Map<String, Map<String, String>> keyValue, final String eventKey) {
 
 	final Set<String> set = new HashSet();
 	for (final Entry entry : keyValue.entrySet()) {
-	    set.add(((Map<String, String>) entry.getValue()).get(name.trim()));
+	    set.add(((Map<String, String>) entry.getValue()).get(eventKey.trim()));
 	}
 	set.removeIf(Objects::isNull);
 	return Joiner.on(COMMA_SPLITTER).join(set);
