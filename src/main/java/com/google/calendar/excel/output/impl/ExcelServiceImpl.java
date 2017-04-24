@@ -115,6 +115,7 @@ public class ExcelServiceImpl implements ExcelService {
 
 	    generateOutputExcel.getWorkbook().setForceFormulaRecalculation(true);
 
+	    // auto width setting for column of output file
 	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 		generateOutputExcel.getSheet().autoSizeColumn(columnIndex);
 	    }
