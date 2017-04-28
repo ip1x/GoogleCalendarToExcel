@@ -24,7 +24,7 @@ import com.google.calendar.exception.InvalidEventException;
 /**
  * This class is used to make key-value pair for events.
  *
- * @author User
+ * @author DAMCO
  *
  */
 public class EventTitleParser {
@@ -45,7 +45,28 @@ public class EventTitleParser {
     public Map<String, Map<String, String>> generateMapForEvents(final Event event, final String userName)
 	    throws InvalidEventException {
 
+	// Create configuration file object to create map of excel table
+	// header name
+	// final ConfigurationFileParser configurationFileParser = new
+	// ConfigurationFileParser("configuration.properties");
+	// final Map<String, String> propertyMap =
+	// configurationFileParser.getPropertyMap();
+	// final List<String> configurationKeyList = new ArrayList<>();
+	// for (final Map.Entry<String, String> entry : propertyMap.entrySet())
+	// {
+	// configurationKeyList.add(entry.getKey());
+	// }
+	//
+	// final StringBuiegexExpresion = new
+	// StringBuilder("(?<=\\G(\\w+(?!\\w+)|");
+	// for (final String key : configurationKeyList) {
+	// regexExpresion.append(":|" + key);
+	// }
+	// regexExpresion.append("))\\s*");
+	// final StriNT_PARSER_REGEX1 =
+	// "(?<=\\G(\\w+(?!\\w+)|:|CLI:|PRJ:|ACT:|TKT:|WBS:|@|%))\\s*";
 	final String eventSummary = event.getSummary();
+	// eventSummary = "#1!:rohit";
 	final String[] data = eventSummary.split(EVENT_PARSER_REGEX);
 
 	final Map<String, String> eventMap = new HashMap<>();
@@ -165,7 +186,7 @@ public class EventTitleParser {
 	    map.put(STARTDATE.toLowerCase(),
 		    CalendarConstant.TABLE_DATE_FORMAT.format(new Date(event.getStart().getDateTime().getValue())));
 	    map.put(STAFF.toLowerCase(), userName);
-	    eventKeyValue.put(event.getSummary(), map);
+	    eventKeyValue.put("", map);
 	    return eventKeyValue;
 	}
     }
