@@ -6,15 +6,16 @@ import static com.google.calendar.constant.CalendarConstant.CHAR_MODULUS;
 import static com.google.calendar.constant.CalendarConstant.CLI;
 import static com.google.calendar.constant.CalendarConstant.COL_SPLITTER;
 import static com.google.calendar.constant.CalendarConstant.ENDDATE;
-import static com.google.calendar.constant.CalendarConstant.EVENT_PARSER_REGEX;
 import static com.google.calendar.constant.CalendarConstant.PRJ;
 import static com.google.calendar.constant.CalendarConstant.STAFF;
 import static com.google.calendar.constant.CalendarConstant.STARTDATE;
 import static com.google.calendar.constant.CalendarConstant.TKT;
 import static com.google.calendar.constant.CalendarConstant.WBS;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.api.services.calendar.model.Event;
@@ -29,85 +30,100 @@ import com.google.calendar.exception.InvalidEventException;
  */
 public class EventTitleParser {
 
-    // public static void main(final String[] args) {
-    // final EventTitleParser eventTitleParser = new EventTitleParser();
-    // Map<String, Map<String, String>> eventKeyValue = new HashMap<String,
-    // Map<String, String>>();
-    // try {
-    // eventKeyValue = eventTitleParser.generateMapForEvents(null, "Rohit");
-    // } catch (final Exception e) {
-    // System.out.println("Event with uncompiled name is found");
-    // eventKeyValue.put("", null);
-    // }
-    // System.out.println(eventKeyValue);
-    // }
+    public static void main(final String[] args) {
+	final EventTitleParser eventTitleParser = new EventTitleParser();
+	Map<String, Map<String, String>> eventKeyValue = new HashMap<String, Map<String, String>>();
+	try {
+	    eventKeyValue = eventTitleParser.generateMapForEvents(null, "Rohit");
+	} catch (final Exception e) {
+	    System.out.println("Event with uncompiled name is found");
+	    eventKeyValue.put("", null);
+	}
+	System.out.println(eventKeyValue);
+    }
 
     public Map<String, Map<String, String>> generateMapForEvents(final Event event, final String userName)
 	    throws InvalidEventException {
 
 	// Create configuration file object to create map of excel table
 	// header name
-	// final ConfigurationFileParser configurationFileParser = new
-	// ConfigurationFileParser("configuration.properties");
-	// final Map<String, String> propertyMap =
-	// configurationFileParser.getPropertyMap();
-	// final List<String> configurationKeyList = new ArrayList<>();
-	// for (final Map.Entry<String, String> entry : propertyMap.entrySet())
-	// {
-	// configurationKeyList.add(entry.getKey());
-	// }
-	//
-	// final StringBuiegexExpresion = new
-	// StringBuilder("(?<=\\G(\\w+(?!\\w+)|");
-	// for (final String key : configurationKeyList) {
-	// regexExpresion.append(":|" + key);
-	// }
-	// regexExpresion.append("))\\s*");
-	// final StriNT_PARSER_REGEX1 =
-	// "(?<=\\G(\\w+(?!\\w+)|:|CLI:|PRJ:|ACT:|TKT:|WBS:|@|%))\\s*";
+	final ConfigurationFileParser configurationFileParser = new ConfigurationFileParser("configuration.properties");
+	final Map<String, String> propertyMap = configurationFileParser.getPropertyMap();
+	final List<String> configurationKeyList = new ArrayList<>();
+	for (final Map.Entry<String, String> entry : propertyMap.entrySet()) {
+	    configurationKeyList.add(entry.getKey().toLowerCase());
+	}
 	final String eventSummary = event.getSummary();
-	// eventSummary = "#1!:rohit";
-	final String[] data = eventSummary.split(EVENT_PARSER_REGEX);
+	//eventSummary = "CLI:aaaaJ:pppp      PRJ:     pppp TKT:nnnn WBS:wwww ACT:aaaa @:cccc %:bbbb"; // valid
+	//eventSummary = "CLI:aaaa TKT:nnnn PRJ:pppp WBS:wwww ACT:aaaa @:cccc %:bbbb"; // valid
+	//eventSummary = ":CLI"; // starting with ":" //invalid
+	//eventSummary = "CLI:  PRJ:sagicor"; // valid
+	//eventSummary = "CLI:aaaaPRJ:pppp TKT:nnnn WBS:wwww ACT:aaaa @:cccc %:bbbb"; // valid
+	//eventSummary = "CLI:aaaaPRJ:pppp PRJ:pppp TKT:nnnn WBS:wwww ACT:aaaa @:cccc %:bbbb"; // valid
+	//eventSummary = "PRJ:propulsor        %:     80   ACT: test on site @:Imola"; // valid
+	//eventSummary = "PRJ:propulsor %:80"; // valid
+	//eventSummary = "CLI :aaaa PRJ:pppp TKT:nnnn WBS:wwww ACT:aaaa @:cccc %:bbbb";  // space between ":" and "CLI" // invalid
+	//eventSummary = "CLI:aaaa PRJ:pppp TKT:nnnn WBS:wwww rohit:aaaa @:cccc %:bbbb"; // invalid tag "rohit" // invalid
+	//eventSummary = "CLI:aaaa PRJ:pppp TKT:nnnn WBS:wwww rohit:aaaa @:cccc %:bbbb";  // valid tag "rohit"  // valid
+	//eventSummary = "CLI:aaaa PRJ:pppp TKT:nnnn WBS:wwww ACT:aaaa @:cccc %:";  // no value    // valid
+	//eventSummary = "CLI:aaaa %: TKT:nnnn WBS:wwww ACT:aaaa @:cccc PRJ:pppp";   // positional   // valid
+	//eventSummary = "cli:aaaa %: TkT:nnnn Wbs:wwww ACT:aaaa @:cccc PRJ:pppp";   // case insensitive   // valid
+	
 
+	String lastKey = "";
 	final Map<String, String> eventMap = new HashMap<>();
-	String key = "";
-	String notKey = null;
-	for (int count = 0; count < data.length; count++) {
-	    try {
-		checkForInvalidEvent(data);
-		if (String.valueOf(CHAR_AT_THE_RATE).equals(data[count])
-			|| String.valueOf(CHAR_MODULUS).equals(data[count])
-			|| ((data.length != (count + 1)) && COL_SPLITTER.equals(data[count + 1]))) {
-		    if (data[count].length() > 3) {
-			final String toLowerCase = data[count].toLowerCase();
-			if (toLowerCase.endsWith(TKT.toLowerCase()) || toLowerCase.endsWith(CLI.toLowerCase())
-				|| toLowerCase.endsWith(PRJ.toLowerCase()) || toLowerCase.endsWith(WBS.toLowerCase())
-				|| toLowerCase.endsWith(ACT.toLowerCase())) {
-			    eventMap.put(key.toLowerCase(), data[count].substring(0, data[count].length() - 3));
-			    key = data[count].substring(data[count].length() - 3, data[count].length()).trim()
-				    .toLowerCase();
-			} else {
-			    if (key == "") {
-				key = data[count].trim().toLowerCase();
-				notKey = null;
-			    } else {
-				eventMap.put(key.toLowerCase(), data[count].trim());
-				notKey = data[count].trim().toLowerCase();
-			    }
-			}
-		    } else {
-			key = data[count].trim().toLowerCase();
-			notKey = null;
-		    }
-		} else if (!COL_SPLITTER.equals(data[count])) {
-		    parsingEventForValue(data, eventMap, key, notKey, count);
-		}
-	    } catch (final Exception e) {
+
+	try {
+	    final String afterReplaceSpace = eventSummary.trim().replaceAll(" +", " ");
+	    if (afterReplaceSpace.length() == 1 || afterReplaceSpace.startsWith(":")) {
 		throw new InvalidEventException();
 	    }
-	}
-	return CheckValidityOfEvent(event, userName, eventMap);
+	    final String[] trimWithSpace = afterReplaceSpace.split(" ");
+	    for (final String data : trimWithSpace) {
+		if (data.endsWith(":")) {
+		    eventMap.put(data.substring(0, data.length() - 1).toLowerCase(), "");
+		    lastKey = data.substring(0, data.length() - 1).toLowerCase();
+		} else {
+		    final String[] dataArray = data.split(":", 2);
+		    if ((dataArray != null) && (dataArray.length == 2)
+			    && configurationKeyList.contains(dataArray[0].toLowerCase())) {
+			eventMap.put(dataArray[0].toLowerCase().trim(), dataArray[1].trim());
+			lastKey = dataArray[0].toLowerCase().trim();
+		    } else if ((dataArray != null) && (dataArray.length == 2)
+			    && !configurationKeyList.contains(dataArray[0].toLowerCase())) {
+			throw new InvalidEventException();
+		    }
+		    if ((dataArray != null) && (dataArray.length == 1)) {
+			if (configurationKeyList.contains(dataArray[0].toLowerCase())) {
+			    lastKey = dataArray[0].toLowerCase();
+			    eventMap.put(lastKey, "");
+			} else if (!configurationKeyList.contains(dataArray[0].toLowerCase()) && !"".equals(lastKey)) {
+			    if (eventMap.get(lastKey) != "") {
+				eventMap.replace(lastKey.toLowerCase(),
+					eventMap.get(lastKey).concat(" ").concat(dataArray[0].trim()));
+			    } else {
+				eventMap.put(lastKey.toLowerCase(), dataArray[0].trim());
+			    }
 
+			}
+		    }
+		}
+	    }
+	    for (final Map.Entry<String, String> entry : eventMap.entrySet()) {
+		if (!configurationKeyList.contains(entry.getKey())) {
+		    throw new InvalidEventException();
+		}
+		System.out.println(entry.getKey() + "=" + entry.getValue());
+	    }
+	} catch (final Exception e) {
+	    throw new InvalidEventException();
+	}
+	final Map<String, Map<String, String>> eventKeyValue = new HashMap<>();
+	eventMap.put(ENDDATE.toLowerCase(), CalendarConstant.TABLE_DATE_FORMAT.format(new Date(event.getEnd().getDateTime().getValue())));
+	eventMap.put(STARTDATE.toLowerCase(), CalendarConstant.TABLE_DATE_FORMAT.format(new Date(event.getStart().getDateTime().getValue())));
+	eventMap.put(STAFF.toLowerCase(), userName);
+	eventKeyValue.put("", eventMap);
+	return eventKeyValue;
     }
 
     private void checkForInvalidEvent(final String[] data) throws InvalidEventException {
