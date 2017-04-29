@@ -31,112 +31,111 @@ import com.google.calendar.csv.reader.CSVReader;
  */
 public class CSVReaderImpl implements CSVReader {
 
-    public final Logger logger = Logger.getLogger(CSVReaderImpl.class);
+	public final Logger logger = Logger.getLogger(CSVReaderImpl.class);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.google.calendar.csv.reader.CSVReader#readCSV(javax.servlet.http.
-     * HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    public Map<String, String> readCSV(final HttpServletRequest request, final HttpServletResponse response) {
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.google.calendar.csv.reader.CSVReader#readCSV(javax.servlet.http.
+	 * HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
+	@Override
+	public Map<String, String> readCSV(final HttpServletRequest request, final HttpServletResponse response) {
 
-	final DiskFileItemFactory factory = new DiskFileItemFactory();
-	factory.setSizeThreshold(CalendarConstant.MAXMEMSIZE);
-	// Location to save data that is larger than maxMemSize.
-	factory.setRepository(new File(CalendarConstant.TEMP_STORAGE_LOCATION));
-	final ServletFileUpload upload = new ServletFileUpload(factory);
-	upload.setSizeMax(CalendarConstant.MAXFILESIZE);
+		final DiskFileItemFactory factory = new DiskFileItemFactory();
+		factory.setSizeThreshold(CalendarConstant.MAXMEMSIZE);
+		// Location to save data that is larger than maxMemSize.
+		factory.setRepository(new File(CalendarConstant.TEMP_STORAGE_LOCATION));
+		final ServletFileUpload upload = new ServletFileUpload(factory);
+		upload.setSizeMax(CalendarConstant.MAXFILESIZE);
 
-	// Create input from CSV
+		// Create input from CSV
 
-	BufferedReader bufferReader = null;
-	String line = "";
+		BufferedReader bufferReader = null;
+		String line = "";
 
-	String lastKey = "";
-	final Map<String, String> inputMap = new LinkedHashMap<>();
+		String lastKey = "";
+		final Map<String, String> inputMap = new LinkedHashMap<>();
 
-	try {
-	    final List fileItems = upload.parseRequest(request);
-	    final Iterator iterator = fileItems.iterator();
-	    InputStream inputStream = null;
-	    while (iterator.hasNext()) {
-		final FileItem fileItem = (FileItem) iterator.next();
-		if (!fileItem.isFormField()) {
-
-		    inputStream = fileItem.getInputStream();
-
-		} else {
-		    throw new FileNotFoundException();
-		}
-	    }
-
-	    bufferReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-
-	    // if ((line = bufferReader.readLine()) != null) {
-	    //
-	    // final String[] argument = line.split(" ");
-	    // for (final String string : argument) {
-	    // final String[] keyValue =
-	    // string.split(CalendarConstant.COL_SPLITTER,2);
-	    // if ((keyValue != null) && (keyValue.length == 2)) {
-	    // inputMap.put(keyValue[0].trim(), keyValue[1].trim());
-	    // lastKey = keyValue[0].trim();
-	    // }
-	    // if((keyValue != null) && (keyValue.length == 1)) {
-	    // inputMap.replace(lastKey, inputMap.get(lastKey).concat("
-	    // ").concat(keyValue[0].trim()));
-	    // }
-	    // }
-	    //
-	    // }
-
-	    if ((line = bufferReader.readLine()) != null) {
-
-		// use ',' as separator
-		final String[] argument = line.split(CalendarConstant.COMMA_SPLITTER);
-
-		for (final String element : argument) {
-
-		    // use : as separator
-		    final String[] argArray = element.split(CalendarConstant.COL_SPLITTER, 2);
-
-		    if (argArray.length == 1) {
-			inputMap.replace(lastKey.trim(), inputMap.get(lastKey).trim().concat("," + argArray[0]));
-		    } else {
-			inputMap.put(argArray[0].trim(), argArray[1]);
-			lastKey = argArray[0].trim();
-		    }
-		}
-
-	    } else {
-
-		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
-		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
-	    }
-
-	} catch (final Exception e) {
-
-	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
-	    try {
-		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
-		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
-	    } catch (ServletException | IOException e1) {
-		logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
-		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
-	    }
-	} finally {
-	    if (bufferReader != null) {
 		try {
-		    bufferReader.close();
-		} catch (final IOException e) {
-		    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
-		}
-	    }
-	}
+			final List fileItems = upload.parseRequest(request);
+			final Iterator iterator = fileItems.iterator();
+			InputStream inputStream = null;
+			while (iterator.hasNext()) {
+				final FileItem fileItem = (FileItem) iterator.next();
+				if (!fileItem.isFormField()) {
 
-	return inputMap;
-    }
+					inputStream = fileItem.getInputStream();
+
+				} else {
+					throw new FileNotFoundException();
+				}
+			}
+
+			bufferReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+
+			if ((line = bufferReader.readLine()) != null) {
+
+				final String[] argument = line.split(" ");
+				for (final String string : argument) {
+					final String[] keyValue =
+							string.split(CalendarConstant.COL_SPLITTER,2);
+					if ((keyValue != null) && (keyValue.length == 2)) {
+						inputMap.put(keyValue[0].trim(), keyValue[1].trim());
+						lastKey = keyValue[0].trim();
+					}
+					if((keyValue != null) && (keyValue.length == 1)) {
+						inputMap.replace(lastKey, inputMap.get(lastKey).concat(" ").concat(keyValue[0].trim()));
+					}
+				}
+
+			}
+
+			//	    if ((line = bufferReader.readLine()) != null) {
+			//
+			//		// use ',' as separator
+			//		final String[] argument = line.split(CalendarConstant.COMMA_SPLITTER);
+			//
+			//		for (final String element : argument) {
+			//
+			//		    // use : as separator
+			//		    final String[] argArray = element.split(CalendarConstant.COL_SPLITTER, 2);
+			//
+			//		    if (argArray.length == 1) {
+			//			inputMap.replace(lastKey.trim(), inputMap.get(lastKey).trim().concat("," + argArray[0]));
+			//		    } else {
+			//			inputMap.put(argArray[0].trim(), argArray[1]);
+			//			lastKey = argArray[0].trim();
+			//		    }
+			//		}
+			//}
+			else {
+
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
+				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+			}
+
+		} catch (final Exception e) {
+
+			logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+			try {
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
+				request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+			} catch (ServletException | IOException e1) {
+				logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
+				request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
+			}
+		} finally {
+			if (bufferReader != null) {
+				try {
+					bufferReader.close();
+				} catch (final IOException e) {
+					logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+				}
+			}
+		}
+
+		return inputMap;
+	}
 
 }
