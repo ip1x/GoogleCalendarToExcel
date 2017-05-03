@@ -83,19 +83,17 @@ public class CalendarConstant {
 
     // Output Excel File Constants
 
-    public static final String STAFF = "Staff";
-
     public static final String PROJECTS = "Projects";
 
     public static final String CLIENTS = "Clients";
 
-    public static final String FROM_HEADER = "From";
+    // public static final String FROM_HEADER = "From";
 
-    public static final String TO_HEADER = "To";
+    // public static final String TO_HEADER = "To";
 
-    public static final String STARTDATE = "Started on";
+    public static final String STARTED_ON = "STARTEDON";
 
-    public static final String ENDDATE = "Ended on";
+    public static final String ENDED_ON = "ENDEDON";
 
     public static final String WORKEDHOURS = "Worked Hours";
 
@@ -157,8 +155,21 @@ public class CalendarConstant {
 
     public static final String ACT = "ACT";
 
+    public static final String STF = "STF";
+
     // Event Parser Regex
 
-    public static final String EVENT_PARSER_REGEX = "(?<=\\G(\\w+(?!\\w+)|:|CLI:|PRJ:|ACT:|TKT:|WBS:|@|%))\\s*";
+    // public static final String EVENT_PARSER_REGEX =
+    // "(?<=\\G(\\w+(?!\\w+)|:|CLI:|PRJ:|ACT:|TKT:|WBS:|@|%))\\s*";
+
+    public static final String PROJECTS_HEADER = "ProjectsHeader";
+
+    public static final String CLIENTS_HEADER = "ClientsHeader";
+
+    public static final String TO_HEADER = "ToHeader";
+
+    public static final String FROM_HEADER = "FromHeader";
+
+    public static final String STAFF_HEADER = "StaffHeader";
 
 }
