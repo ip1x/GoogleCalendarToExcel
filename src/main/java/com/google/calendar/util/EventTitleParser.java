@@ -36,7 +36,7 @@ public class EventTitleParser {
     // }
 
     public Map<String, Map<String, String>> generateMapForEvents(final Event event, final String userName,
-	    final String configurationFilePath) throws InvalidEventException {
+	    final String configurationFilePath, final String calendarName) throws InvalidEventException {
 
 	// Create configuration file object to create map of excel table
 	// header name
@@ -126,7 +126,7 @@ public class EventTitleParser {
 		CalendarConstant.TABLE_DATE_FORMAT.format(new Date(event.getEnd().getDateTime().getValue())));
 	eventMap.put(STARTED_ON.toLowerCase(),
 		CalendarConstant.TABLE_DATE_FORMAT.format(new Date(event.getStart().getDateTime().getValue())));
-	eventMap.put(STF.toLowerCase(), userName);
+	eventMap.put(STF.toLowerCase(), calendarName);
 	eventKeyValue.put(event.getSummary(), eventMap);
 	return eventKeyValue;
     }

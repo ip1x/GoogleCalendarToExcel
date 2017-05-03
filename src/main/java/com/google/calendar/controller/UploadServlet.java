@@ -146,7 +146,8 @@ public class UploadServlet extends HttpServlet {
 			    for (final Event event : items) {
 				try {
 				    firstEvent = parsingEvents(firstEvent, projectNameAsList, clientNameAsList,
-					    excelData, userName, eventTitleParser, event, inOutPath);
+					    excelData, userName, eventTitleParser, event, inOutPath,
+					    calendarListEntry.getSummary());
 				} catch (final Exception e) {
 				    logger.info("Event with uncompiled name is found");
 				    excelData.put(event.getSummary(), null);
@@ -243,15 +244,16 @@ public class UploadServlet extends HttpServlet {
      * @param event
      *            event to be checked for adding to excel output file
      * @param configurationFilePath
+     * @param calendarName
      * @return
      * @throws InvalidEventException
      */
     private Event parsingEvents(Event firstEvent, final List<String> projectName, final List<String> clientName,
 	    final Map<String, Map<String, String>> excelData, final String userName,
-	    final EventTitleParser eventTitleParser, final Event event, final String configurationFilePath)
-	    throws InvalidEventException {
+	    final EventTitleParser eventTitleParser, final Event event, final String configurationFilePath,
+	    final String calendarName) throws InvalidEventException {
 	final Map<String, Map<String, String>> eventKeyValue = eventTitleParser.generateMapForEvents(event, userName,
-		configurationFilePath);
+		configurationFilePath, calendarName);
 	final String eventSummary = event.getSummary();
 
 	if ((clientName.isEmpty() && projectName.isEmpty())

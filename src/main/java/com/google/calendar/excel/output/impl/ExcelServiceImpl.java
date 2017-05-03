@@ -8,6 +8,7 @@ import static com.google.calendar.constant.CalendarConstant.FROM_HEADER;
 import static com.google.calendar.constant.CalendarConstant.PRJ;
 import static com.google.calendar.constant.CalendarConstant.PROJECTS_HEADER;
 import static com.google.calendar.constant.CalendarConstant.STAFF_HEADER;
+import static com.google.calendar.constant.CalendarConstant.STF;
 import static com.google.calendar.constant.CalendarConstant.TO_HEADER;
 
 import java.io.FileOutputStream;
@@ -93,8 +94,9 @@ public class ExcelServiceImpl implements ExcelService {
 	    }
 
 	    // basic details of sheet
-	    setHeaderValue(sheet, getValueFromKeyAsString(eventKeyValue, CLI.toLowerCase()), userName,
-		    getValueFromKeyAsString(eventKeyValue, PRJ.toLowerCase()), dateList.get(0), dateList.get(1),
+	    setHeaderValue(sheet, getValueFromKeyAsString(eventKeyValue, CLI.toLowerCase()),
+		    getValueFromKeyAsString(eventKeyValue, PRJ.toLowerCase()),
+		    getValueFromKeyAsString(eventKeyValue, STF.toLowerCase()), dateList.get(0), dateList.get(1),
 		    headerRow, columnSize, propertyMap);
 
 	    // setHeaderValue(sheet, clientNameAsString, userName,
@@ -248,10 +250,9 @@ public class ExcelServiceImpl implements ExcelService {
      *            Excel sheet
      * @param clientName
      *            Name of Client
-     * @param userName
-     *            google user name
      * @param projectNames
      *            name of project
+     * @param calenderName
      * @param startDate
      *            Start date for event filter
      * @param endDate
@@ -263,8 +264,8 @@ public class ExcelServiceImpl implements ExcelService {
      * @param propertyMap
      *            Map containing properties for dynamic headers of output file
      */
-    private void setHeaderValue(final Sheet sheet, final String clientName, final String userName,
-	    final String projectNames, final Date startDate, final Date endDate, final int headerRow,
+    private void setHeaderValue(final Sheet sheet, final String clientName, final String projectNames,
+	    final String calenderName, final Date startDate, final Date endDate, final int headerRow,
 	    final int columnSize, final Map<String, String> propertyMap) {
 	for (int rowIndex = 0; rowIndex < headerRow; rowIndex++) {
 	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
@@ -281,7 +282,7 @@ public class ExcelServiceImpl implements ExcelService {
 			final String cellValue = cell.getStringCellValue().trim();
 			if (cellValue.equals(propertyMap.get(STAFF_HEADER))) {
 			    valueCell = row.getCell(columnIndex + 1);
-			    valueCell.setCellValue(userName);
+			    valueCell.setCellValue(calenderName);
 			} else if (cellValue.equals(propertyMap.get(FROM_HEADER))) {
 			    valueCell = row.getCell(columnIndex + 1);
 			    valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(startDate));
