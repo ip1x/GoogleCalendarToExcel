@@ -18,7 +18,7 @@ public class ServiceFactory {
      * private constructor to stop object creation
      */
     private ServiceFactory() {
-        // Private constructor
+	// Private constructor
     }
 
     /**
@@ -28,17 +28,18 @@ public class ServiceFactory {
      * @param className
      * @return
      */
+    @SuppressWarnings("rawtypes")
     public static Object getInstance(final Class className) {
 
-        if (CalendarService.class.equals(className)) {
-            return new CalendarServiceImpl();
-        } else if (CSVReader.class.equals(className)) {
-            return new CSVReaderImpl();
-        } else if (ExcelService.class.equals(className)) {
-            return new ExcelServiceImpl();
-        } else {
-            throw new RuntimeException();
-        }
+	if (CalendarService.class.equals(className)) {
+	    return new CalendarServiceImpl();
+	} else if (CSVReader.class.equals(className)) {
+	    return new CSVReaderImpl();
+	} else if (ExcelService.class.equals(className)) {
+	    return new ExcelServiceImpl();
+	} else {
+	    throw new RuntimeException();
+	}
 
     }
 

@@ -13,7 +13,6 @@ public class CalendarConstant {
 
     private CalendarConstant() {
 	// default constructor
-
     }
 
     /**
@@ -81,25 +80,7 @@ public class CalendarConstant {
 
     public static final String ERROR_NO_EVENT_FOUND = "No Events Found";
 
-    // Output Excel File Constants
-
-    public static final String PROJECTS = "Projects";
-
-    public static final String CLIENTS = "Clients";
-
-    // public static final String FROM_HEADER = "From";
-
-    // public static final String TO_HEADER = "To";
-
-    public static final String STARTED_ON = "STARTEDON";
-
-    public static final String ENDED_ON = "ENDEDON";
-
-    public static final String WORKEDHOURS = "Worked Hours";
-
-    public static final String USERS = "Users";
-
-    // String splitter
+    // Special Strings
 
     public static final String COMMA_SPLITTER = ",";
 
@@ -137,30 +118,19 @@ public class CalendarConstant {
 
     public static final Format TABLE_DATE_FORMAT = new SimpleDateFormat("M/dd/yy HH:mm");
 
-    // Character constants
-
-    public static final char CHAR_MODULUS = '%';
-
-    public static final char CHAR_AT_THE_RATE = '@';
-
     // Events Titles
 
-    public static final String CLI = "CLI";
+    public static final String CLI_LOWER_CASE = "cli";
 
-    public static final String PRJ = "PRJ";
+    public static final String PRJ_LOWER_CASE = "prj";
 
-    public static final String TKT = "TKT";
+    public static final String ACT_LOWER_CASE = "act";
 
-    public static final String WBS = "WBS";
+    public static final String STF_LOWER_CASE = "stf";
 
-    public static final String ACT = "ACT";
+    public static final String STARTED_ON_LOWER_CASE = "startedon";
 
-    public static final String STF = "STF";
-
-    // Event Parser Regex
-
-    // public static final String EVENT_PARSER_REGEX =
-    // "(?<=\\G(\\w+(?!\\w+)|:|CLI:|PRJ:|ACT:|TKT:|WBS:|@|%))\\s*";
+    public static final String ENDED_ON_LOWER_CASE = "endedon";
 
     public static final String PROJECTS_HEADER = "ProjectsHeader";
 

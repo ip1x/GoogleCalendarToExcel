@@ -18,9 +18,6 @@ public interface ExcelService {
      * Used to copy template file to a temporary location, then populating the
      * copied file with required date of events.
      *
-     *
-     * @param userName
-     *            google user name
      * @param templatePath
      *            template file location
      * @param inOutPath
@@ -33,9 +30,8 @@ public interface ExcelService {
      *            event filter end date
      * @throws ExcelFormatException
      */
-    public void generateExcel(String userName, String templatePath, String inOutPath,
-	    Map<String, Map<String, String>> excelData, List<Date> dateList, String resultPath)
-	    throws ExcelFormatException;
+    public void generateExcel(String templatePath, String inOutPath, Map<String, Map<String, String>> excelData,
+	    List<Date> dateList, String resultPath) throws ExcelFormatException;
 
     // /**
     // * Will convert event name into data field.

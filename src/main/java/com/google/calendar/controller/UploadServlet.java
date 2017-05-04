@@ -1,9 +1,6 @@
 
 package com.google.calendar.controller;
 
-import static com.google.calendar.constant.CalendarConstant.CLI;
-import static com.google.calendar.constant.CalendarConstant.PRJ;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -73,6 +70,8 @@ public class UploadServlet extends HttpServlet {
 	try {
 	    response.setContentType(CalendarConstant.CONTENT_TYPE);
 	    final CSVReader csvReader = (CSVReader) ServiceFactory.getInstance(CSVReader.class);
+
+	    logger.info("Start Reading CSV file.............");
 	    final Map<String, String> inputMap = csvReader.readCSV(request, response);
 
 	    final List<String> calendarName = Arrays
@@ -88,15 +87,9 @@ public class UploadServlet extends HttpServlet {
 	    final List<String> projectNameAsList = inputMap.get(CalendarConstant.PROJECT) != null
 		    ? Arrays.asList(inputMap.get(CalendarConstant.PROJECT).split(CalendarConstant.COMMA_SPLITTER))
 		    : new ArrayList<>();
-	    // final String projectNameAsString =
-	    // inputMap.get(CalendarConstant.PROJECT) != null
-	    // ? inputMap.get(CalendarConstant.PROJECT) : "";
 	    final List<String> clientNameAsList = inputMap.get(CalendarConstant.CLIENT) != null
 		    ? Arrays.asList(inputMap.get(CalendarConstant.CLIENT).split(CalendarConstant.COMMA_SPLITTER))
 		    : new ArrayList<>();
-	    // final String clientNameAsString =
-	    // inputMap.get(CalendarConstant.CLIENT) != null
-	    // ? inputMap.get(CalendarConstant.CLIENT) : "";
 
 	    // created Date format for date 201703010000
 	    final SimpleDateFormat dateFormat = new SimpleDateFormat(CalendarConstant.DATE_FORMAT);
@@ -122,16 +115,18 @@ public class UploadServlet extends HttpServlet {
 	    // Note: Do not confuse this class with the
 	    // com.google.api.services.calendar.model.Calendar class.
 	    final CalendarService calendarService = (CalendarService) ServiceFactory.getInstance(CalendarService.class);
+
+	    logger.info("Fetching all calendars for the user.............");
 	    final Calendar service = calendarService.getCalendarService(request, response);
 
 	    final Map<String, Map<String, String>> excelData = new HashMap<>();
-	    String userName = "";
 	    String pageToken = null;
 
 	    do {
 		final CalendarList calendarList = service.calendarList().list().setPageToken(pageToken).execute();
 		final List<CalendarListEntry> listItems = calendarList.getItems();
 
+		logger.info("Parsing all calendars for the required calendars only.............");
 		for (final CalendarListEntry calendarListEntry : listItems) {
 		    if (calendarName.contains(calendarListEntry.getSummary())) {
 			final Events events = service.events().list(calendarListEntry.getId()).setMaxResults(100)
@@ -141,13 +136,12 @@ public class UploadServlet extends HttpServlet {
 			if (items.isEmpty()) {
 
 			} else {
-			    userName = items.get(0).getCreator().getDisplayName();
-			    final EventTitleParser eventTitleParser = new EventTitleParser();
+
+			    logger.info("Parsing all events for calendars .............");
 			    for (final Event event : items) {
 				try {
 				    firstEvent = parsingEvents(firstEvent, projectNameAsList, clientNameAsList,
-					    excelData, userName, eventTitleParser, event, inOutPath,
-					    calendarListEntry.getSummary());
+					    excelData, event, inOutPath, calendarListEntry.getSummary());
 				} catch (final Exception e) {
 				    logger.info("Event with uncompiled name is found");
 				    excelData.put(event.getSummary(), null);
@@ -163,7 +157,7 @@ public class UploadServlet extends HttpServlet {
 	    dateList.add(fromDate);
 	    dateList.add(toDate);
 	    final ExcelService excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
-	    excelService.generateExcel(userName, templatePath, inOutPath, excelData, dateList, resultPath);
+	    excelService.generateExcel(templatePath, inOutPath, excelData, dateList, resultPath);
 
 	    if (firstEvent != null) {
 		final File file = new File(CalendarConstant.RESULT_FILE_NAME.equals(resultPath)
@@ -174,7 +168,6 @@ public class UploadServlet extends HttpServlet {
 		    final String[] splitPathArr = resultPath.split("\\\\");
 		    resultPath = splitPathArr[splitPathArr.length - 1];
 		}
-
 		response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultPath);
 		final OutputStream outstream = response.getOutputStream();
 		IOUtils.copyLarge(inputStream, outstream);
@@ -236,11 +229,6 @@ public class UploadServlet extends HttpServlet {
      *            name of client for which output file is to be created
      * @param excelData
      *            empty map which will contain event and its key-value pair
-     * @param userName
-     *            google account user name
-     * @param eventTitleParser
-     *            object containing method to generate map containing event and
-     *            its key-value par
      * @param event
      *            event to be checked for adding to excel output file
      * @param configurationFilePath
@@ -249,94 +237,19 @@ public class UploadServlet extends HttpServlet {
      * @throws InvalidEventException
      */
     private Event parsingEvents(Event firstEvent, final List<String> projectName, final List<String> clientName,
-	    final Map<String, Map<String, String>> excelData, final String userName,
-	    final EventTitleParser eventTitleParser, final Event event, final String configurationFilePath,
+	    final Map<String, Map<String, String>> excelData, final Event event, final String configurationFilePath,
 	    final String calendarName) throws InvalidEventException {
-	final Map<String, Map<String, String>> eventKeyValue = eventTitleParser.generateMapForEvents(event, userName,
+	final EventTitleParser eventTitleParser = new EventTitleParser();
+	final Map<String, Map<String, String>> eventKeyValue = eventTitleParser.generateMapForEvents(event,
 		configurationFilePath, calendarName);
 	final String eventSummary = event.getSummary();
 
 	if ((clientName.isEmpty() && projectName.isEmpty())
-		|| (clientName.contains(eventKeyValue.get(eventSummary).get(CLI.toLowerCase())))
-		|| (projectName.contains(eventKeyValue.get(eventSummary).get(PRJ.toLowerCase())))) {
+		|| (clientName.contains(eventKeyValue.get(eventSummary).get(CalendarConstant.CLI_LOWER_CASE)))
+		|| (projectName.contains(eventKeyValue.get(eventSummary).get(CalendarConstant.PRJ_LOWER_CASE)))) {
 	    excelData.put(eventSummary, eventKeyValue.get(eventSummary));
 	    firstEvent = event;
 	}
-
-	// if
-	// ((clientName.contains(eventKeyValue.get(eventSummary).get(CLI.toLowerCase()))
-	// || clientName.isEmpty())
-	// &&
-	// (projectName.contains(eventKeyValue.get(eventSummary).get(PRJ.toLowerCase()))
-	// || projectName.isEmpty())) {
-	//
-	// excelData.put(eventSummary, eventKeyValue.get(eventSummary));
-	// firstEvent = event;
-	// DateTime start =
-	// event.getStart().getDateTime();
-	// DateTime end =
-	// event.getEnd().getDateTime();
-	//
-	// if (start == null) {
-	// start = event.getStart().getDate();
-	// }
-	// if (end == null) {
-	// end = event.getEnd().getDate();
-	// }
-	// Index 0 has start date and index 1
-	// has
-	// end date in dateList.
-	// final List<DateTime> dateList = new
-	// LinkedList<>();
-	// dateList.add(start);
-	// dateList.add(end);
-	//
-	// excelData.put(event.getSummary(),
-	// dateList);
-
-	// }
 	return firstEvent;
     }
-
-    // /**
-    // * Used to fetch CLIENT and PROJECT details from the calendar event.
-    // * It also checks whether event is in valid format or not.
-    // *
-    // * @param summary
-    // * event title to be parsed for details.
-    // * @return
-    // */
-    // private Map<String, String> getProjecAndClientName(final String summary)
-    // {
-    //
-    // final Map<String, String> map = new TreeMap<String,
-    // String>(String.CASE_INSENSITIVE_ORDER);
-    // final String[] eventData = summary.split(" ");
-    // String lastKey = "";
-    // for (final String string : eventData) {
-    // final String[] keyValue = string.split(COL_SPLITTER);
-    // if (keyValue != null && keyValue.length == 2) {
-    // map.put(keyValue[0].trim(), keyValue[1].trim());
-    // lastKey = keyValue[0].trim();
-    // } else if (keyValue.length == 3) {
-    // return new HashMap<>();
-    // } else if (keyValue.length == 1 && !"".equals(lastKey)) {
-    // if ("".equals(keyValue[0])) {
-    // continue;
-    // }
-    // if ((keyValue[0].charAt(0) == CHAR_AT_THE_RATE) || (keyValue[0].charAt(0)
-    // == CHAR_MODULUS)) {
-    // if (keyValue[0].length() == 1) {
-    // return new HashMap<>();
-    // }
-    // lastKey = "";
-    // } else {
-    // map.replace(lastKey, map.get(lastKey).concat("
-    // ").concat(keyValue[0].trim()));
-    // }
-    // }
-    // }
-    // return map;
-    // }
-    //
 }

@@ -1,16 +1,5 @@
 package com.google.calendar.excel.output.impl;
 
-import static com.google.calendar.constant.CalendarConstant.ACT;
-import static com.google.calendar.constant.CalendarConstant.CLI;
-import static com.google.calendar.constant.CalendarConstant.CLIENTS_HEADER;
-import static com.google.calendar.constant.CalendarConstant.COMMA_SPLITTER;
-import static com.google.calendar.constant.CalendarConstant.FROM_HEADER;
-import static com.google.calendar.constant.CalendarConstant.PRJ;
-import static com.google.calendar.constant.CalendarConstant.PROJECTS_HEADER;
-import static com.google.calendar.constant.CalendarConstant.STAFF_HEADER;
-import static com.google.calendar.constant.CalendarConstant.STF;
-import static com.google.calendar.constant.CalendarConstant.TO_HEADER;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
@@ -47,8 +36,16 @@ public class ExcelServiceImpl implements ExcelService {
 
     private GenerateOutputExcel generateOutputExcel;
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.google.calendar.excel.output.ExcelService#generateExcel(java.lang.
+     * String, java.lang.String, java.util.Map, java.util.List,
+     * java.lang.String)
+     */
     @Override
-    public void generateExcel(final String userName, final String templatePath, final String inOutPath,
+    public void generateExcel(final String templatePath, final String inOutPath,
 	    final Map<String, Map<String, String>> excelData, final List<Date> dateList, final String resultPath)
 	    throws ExcelFormatException {
 
@@ -59,12 +56,6 @@ public class ExcelServiceImpl implements ExcelService {
 	    // header name
 	    final ConfigurationFileParser configurationFileParser = new ConfigurationFileParser(inOutPath);
 	    final Map<String, String> propertyMap = configurationFileParser.getPropertyMap();
-
-	    // Added excel header field which comes from event details
-	    // propertyMap.put(STARTDATE, STARTDATE);
-	    // propertyMap.put(ENDDATE, ENDDATE);
-	    // propertyMap.put(STAFF, STAFF);
-	    // propertyMap.put(WORKEDHOURS, WORKEDHOURS);
 
 	    // Create copy of supplied excel file to populate data in excel
 	    generateOutputExcel = new GenerateOutputExcel();
@@ -82,7 +73,7 @@ public class ExcelServiceImpl implements ExcelService {
 	    for (final Map.Entry<String, Map<String, String>> entry : excelData.entrySet()) {
 		final Map<String, String> eventDetails = new HashMap<>();
 		if (entry.getValue() == null) {
-		    eventDetails.put(ACT.toLowerCase(), entry.getKey());
+		    eventDetails.put(CalendarConstant.ACT_LOWER_CASE, entry.getKey());
 		    eventKeyValue.put(entry.getKey(), eventDetails);
 		} else {
 
@@ -94,28 +85,20 @@ public class ExcelServiceImpl implements ExcelService {
 	    }
 
 	    // basic details of sheet
-	    setHeaderValue(sheet, getValueFromKeyAsString(eventKeyValue, CLI.toLowerCase()),
-		    getValueFromKeyAsString(eventKeyValue, PRJ.toLowerCase()),
-		    getValueFromKeyAsString(eventKeyValue, STF.toLowerCase()), dateList.get(0), dateList.get(1),
-		    headerRow, columnSize, propertyMap);
-
-	    // setHeaderValue(sheet, clientNameAsString, userName,
-	    // projectNameAsString, dateList.get(0), dateList.get(1),
-	    // headerRow, columnSize);
+	    setHeaderValue(sheet, getValueFromKeyAsString(eventKeyValue, CalendarConstant.CLI_LOWER_CASE),
+		    getValueFromKeyAsString(eventKeyValue, CalendarConstant.PRJ_LOWER_CASE),
+		    getValueFromKeyAsString(eventKeyValue, CalendarConstant.STF_LOWER_CASE), dateList, headerRow,
+		    columnSize, propertyMap);
 
 	    // populate excel table with event details
 	    setColumnsValue(sheet, columnSize, headerRow, eventKeyValue, propertyMap);
-
-	    // generateOutputExcel.getWorkbook().getCreationHelper().createFormulaEvaluator().evaluateAll();
 
 	    generateOutputExcel.getWorkbook().setForceFormulaRecalculation(true);
 
 	    // update the excel with updated sheet.
 	    outFile = new FileOutputStream(CalendarConstant.RESULT_FILE_NAME.equals(resultPath)
 		    ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
-	    // HSSFFormulaEvaluator.evaluateAllFormulaCells(generateOutputExcel.getWorkbook());
 	    generateOutputExcel.getWorkbook().write(outFile);
-	    // HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
 	    outFile.close();
 
 	} catch (final Exception e) {
@@ -133,62 +116,6 @@ public class ExcelServiceImpl implements ExcelService {
 	}
 
     }
-
-    // /**
-    // * Will convert event name into data field.
-    // *
-    // * @param entry
-    // * object for event name with date details
-    // * @param userName
-    // * google user name
-    // * @return Map with key value from event name
-    // */
-    // @Override
-    // public Map<String, String> getDataFromEventName(final Entry<String,
-    // List<DateTime>> entry, final String userName) {
-    // final Map<String, String> map = new HashMap<>();
-    //
-    // final String[] eventData = (entry.getKey()).split(" ");
-    // String lastKey = "";
-    // for (final String string : eventData) {
-    // final String[] keyValue = string.split(COL_SPLITTER);
-    // if (keyValue != null && keyValue.length == 2) {
-    // map.put(keyValue[0].trim().toLowerCase(), keyValue[1].trim());
-    // lastKey = keyValue[0].trim().toLowerCase();
-    // } else if (keyValue.length == 1) {
-    // if ("".equals(keyValue[0])) {
-    // continue;
-    // }
-    // if (keyValue[0].charAt(0) == CHAR_AT_THE_RATE || keyValue[0].charAt(0) ==
-    // CHAR_MODULUS) {
-    // map.put(Character.toString(keyValue[0].trim().charAt(0)),
-    // keyValue[0].trim().substring(1, keyValue[0].length()));
-    // } else {
-    // map.replace(lastKey, map.get(lastKey).concat(" ").concat(keyValue[0]));
-    // }
-    // }
-    // }
-    //
-    // final long duration = new
-    // Date(entry.getValue().get(1).getValue()).getTime()
-    // - new Date(entry.getValue().get(0).getValue()).getTime();
-    //
-    // final long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
-    //
-    // map.put(ENDDATE.toLowerCase(),
-    // CalendarConstant.TABLE_DATE_FORMAT.format(new
-    // Date(entry.getValue().get(1).getValue())));
-    // map.put(STARTDATE.toLowerCase(),
-    // CalendarConstant.TABLE_DATE_FORMAT.format(new
-    // Date(entry.getValue().get(0).getValue())));
-    // map.put(STAFF.toLowerCase(), userName);
-    // // map.put(WORKEDHOURS.toLowerCase(),
-    // // diffInMinutes / 60 + COL_SPLITTER + String.format("%02d",
-    // // diffInMinutes % 60));
-    //
-    // return map;
-    //
-    // }
 
     /**
      * Will set event details in excel table
@@ -253,10 +180,8 @@ public class ExcelServiceImpl implements ExcelService {
      * @param projectNames
      *            name of project
      * @param calenderName
-     * @param startDate
-     *            Start date for event filter
-     * @param endDate
-     *            End date for event filter
+     * @param dateList
+     *
      * @param headerRow
      *            max row to iterate
      * @param columnSize
@@ -265,8 +190,8 @@ public class ExcelServiceImpl implements ExcelService {
      *            Map containing properties for dynamic headers of output file
      */
     private void setHeaderValue(final Sheet sheet, final String clientName, final String projectNames,
-	    final String calenderName, final Date startDate, final Date endDate, final int headerRow,
-	    final int columnSize, final Map<String, String> propertyMap) {
+	    final String calenderName, final List<Date> dateList, final int headerRow, final int columnSize,
+	    final Map<String, String> propertyMap) {
 	for (int rowIndex = 0; rowIndex < headerRow; rowIndex++) {
 	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 		final Row row = sheet.getRow(rowIndex);
@@ -280,41 +205,22 @@ public class ExcelServiceImpl implements ExcelService {
 		    Cell valueCell;
 		    if ((cell != null) && (cell.getStringCellValue() != null) && !cell.getStringCellValue().isEmpty()) {
 			final String cellValue = cell.getStringCellValue().trim();
-			if (cellValue.equals(propertyMap.get(STAFF_HEADER))) {
+			if (cellValue.equals(propertyMap.get(CalendarConstant.STAFF_HEADER))) {
 			    valueCell = row.getCell(columnIndex + 1);
 			    valueCell.setCellValue(calenderName);
-			} else if (cellValue.equals(propertyMap.get(FROM_HEADER))) {
+			} else if (cellValue.equals(propertyMap.get(CalendarConstant.FROM_HEADER))) {
 			    valueCell = row.getCell(columnIndex + 1);
-			    valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(startDate));
-			} else if (cellValue.equals(propertyMap.get(TO_HEADER))) {
+			    valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(dateList.get(0)));
+			} else if (cellValue.equals(propertyMap.get(CalendarConstant.TO_HEADER))) {
 			    valueCell = row.getCell(columnIndex + 1);
-			    valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(endDate));
-			} else if (cellValue.equals(propertyMap.get(CLIENTS_HEADER))) {
+			    valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(dateList.get(1)));
+			} else if (cellValue.equals(propertyMap.get(CalendarConstant.CLIENTS_HEADER))) {
 			    valueCell = row.getCell(columnIndex + 1);
 			    valueCell.setCellValue(clientName);
-			} else if (cellValue.equals(propertyMap.get(PROJECTS_HEADER))) {
+			} else if (cellValue.equals(propertyMap.get(CalendarConstant.PROJECTS_HEADER))) {
 			    valueCell = row.getCell(columnIndex + 1);
 			    valueCell.setCellValue(projectNames);
 			}
-			// switch (cell.getStringCellValue().trim()) {
-			//
-			//
-			// valueCell = row.getCell(columnIndex + 1);
-			// valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(endDate));
-			// break;
-			//
-			// case propertyMap.get("ClientsHeader"):
-			// valueCell = row.getCell(columnIndex + 1);
-			// valueCell.setCellValue(clientName);
-			// break;
-			// case propertyMap.get("ProjectsHeader"):
-			// valueCell = row.getCell(columnIndex + 1);
-			// valueCell.setCellValue(projectNames);
-			// break;
-			//
-			// default:
-			// break;
-			// }
 		    }
 		}
 	    }
@@ -365,7 +271,7 @@ public class ExcelServiceImpl implements ExcelService {
 	    set.add(((Map<String, String>) entry.getValue()).get(eventKey.trim()));
 	}
 	set.removeIf(Objects::isNull);
-	return Joiner.on(COMMA_SPLITTER).join(set);
+	return Joiner.on(CalendarConstant.COMMA_SPLITTER).join(set);
     }
 
 }
