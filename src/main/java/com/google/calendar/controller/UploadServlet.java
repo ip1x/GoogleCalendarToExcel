@@ -93,8 +93,6 @@ public class UploadServlet extends HttpServlet {
 
 	    // created Date format for date 201703010000
 	    final SimpleDateFormat dateFormat = new SimpleDateFormat(CalendarConstant.DATE_FORMAT);
-	    DateTime from = null;
-	    DateTime to = null;
 
 	    final java.util.Calendar today = java.util.Calendar.getInstance();
 
@@ -108,8 +106,8 @@ public class UploadServlet extends HttpServlet {
 	    final Date toDate = inputMap.get(CalendarConstant.TO) != null
 		    ? dateFormat.parse(inputMap.get(CalendarConstant.TO)) : yearEnd.getTime();
 
-	    from = new DateTime(fromDate);
-	    to = new DateTime(toDate);
+	    final DateTime from = new DateTime(fromDate);
+	    final DateTime to = new DateTime(toDate);
 
 	    // Build a new authorized API client service.
 	    // Note: Do not confuse this class with the
