@@ -33,16 +33,4 @@ public interface ExcelService {
     public void generateExcel(String templatePath, String inOutPath, Map<String, Map<String, String>> excelData,
 	    List<Date> dateList, String resultPath) throws ExcelFormatException;
 
-    // /**
-    // * Will convert event name into data field.
-    // *
-    // * @param entry
-    // * object for event name with date details
-    // * @param userName
-    // * google user name
-    // * @return Map with key value from event name
-    // */
-    // Map<String, String> getDataFromEventName(Entry<String, List<DateTime>>
-    // entry, String userName);
-
 }

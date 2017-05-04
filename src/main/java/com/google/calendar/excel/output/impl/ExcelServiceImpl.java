@@ -131,7 +131,7 @@ public class ExcelServiceImpl implements ExcelService {
      * @param propertyMap
      *            provided configuration for excel table number
      */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings("rawtypes")
     public void setColumnsValue(final Sheet sheet, final int columnSize, final int headerRowNo,
 	    final Map<String, Map<String, String>> excelData, final Map<String, String> propertyMap) {
 	final int lastRowSize = headerRowNo + excelData.size();
@@ -146,28 +146,44 @@ public class ExcelServiceImpl implements ExcelService {
 
 		if ((hearderCell != null) && hearderCell.getStringCellValue().trim()
 			.equalsIgnoreCase((String) propertyEntry.getValue())) {
-		    for (int rowIndex = headerRowNo + 1; rowIndex <= lastRowSize; rowIndex++) {
-
-			for (final Entry entry : excelData.entrySet()) {
-			    final Row valueRow = sheet.getRow(rowIndex++);
-			    if (valueRow != null) {
-				final Cell cell = valueRow.getCell(columnIndex);
-				final String data = (String) ((Map) entry.getValue())
-					.get(propertyEntry.getKey().toString().toLowerCase());
-				if (data != null && !data.isEmpty()) {
-				    cell.setCellValue((String) ((Map) entry.getValue())
-					    .get(propertyEntry.getKey().toString().toLowerCase()));
-				}
-			    }
-			}
-		    }
-
-		    // auto width setting for column of output file
-		    generateOutputExcel.getSheet().autoSizeColumn(columnIndex);
+		    populateTableColumns(sheet, headerRowNo, excelData, lastRowSize, propertyEntry, columnIndex);
 		}
 	    }
 	}
 
+    }
+
+    /**
+     *
+     * @param sheet
+     * @param headerRowNo
+     * @param excelData
+     * @param lastRowSize
+     * @param propertyEntry
+     * @param columnIndex
+     */
+    @SuppressWarnings("rawtypes")
+    private void populateTableColumns(final Sheet sheet, final int headerRowNo,
+	    final Map<String, Map<String, String>> excelData, final int lastRowSize, final Entry propertyEntry,
+	    final int columnIndex) {
+	for (int rowIndex = headerRowNo + 1; rowIndex <= lastRowSize; rowIndex++) {
+
+	    for (final Entry entry : excelData.entrySet()) {
+		final Row valueRow = sheet.getRow(rowIndex++);
+		if (valueRow != null) {
+		    final Cell cell = valueRow.getCell(columnIndex);
+		    final String data = (String) ((Map) entry.getValue())
+			    .get(propertyEntry.getKey().toString().toLowerCase());
+		    if (data != null && !data.isEmpty()) {
+			cell.setCellValue(
+				(String) ((Map) entry.getValue()).get(propertyEntry.getKey().toString().toLowerCase()));
+		    }
+		}
+	    }
+	}
+
+	// auto width setting for column of output file
+	generateOutputExcel.getSheet().autoSizeColumn(columnIndex);
     }
 
     /**
@@ -196,33 +212,49 @@ public class ExcelServiceImpl implements ExcelService {
 	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 		final Row row = sheet.getRow(rowIndex);
 		if (row != null) {
-		    final Cell cell = row.getCell(columnIndex);
-
-		    if (cell != null) {
-			cell.setCellType(CellType.STRING);
-		    }
-
-		    Cell valueCell;
-		    if ((cell != null) && (cell.getStringCellValue() != null) && !cell.getStringCellValue().isEmpty()) {
-			final String cellValue = cell.getStringCellValue().trim();
-			if (cellValue.equals(propertyMap.get(CalendarConstant.STAFF_HEADER))) {
-			    valueCell = row.getCell(columnIndex + 1);
-			    valueCell.setCellValue(calenderName);
-			} else if (cellValue.equals(propertyMap.get(CalendarConstant.FROM_HEADER))) {
-			    valueCell = row.getCell(columnIndex + 1);
-			    valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(dateList.get(0)));
-			} else if (cellValue.equals(propertyMap.get(CalendarConstant.TO_HEADER))) {
-			    valueCell = row.getCell(columnIndex + 1);
-			    valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(dateList.get(1)));
-			} else if (cellValue.equals(propertyMap.get(CalendarConstant.CLIENTS_HEADER))) {
-			    valueCell = row.getCell(columnIndex + 1);
-			    valueCell.setCellValue(clientName);
-			} else if (cellValue.equals(propertyMap.get(CalendarConstant.PROJECTS_HEADER))) {
-			    valueCell = row.getCell(columnIndex + 1);
-			    valueCell.setCellValue(projectNames);
-			}
-		    }
+		    populateFieldsAboveTable(clientName, projectNames, calenderName, dateList, propertyMap, columnIndex,
+			    row);
 		}
+	    }
+	}
+    }
+
+    /**
+     *
+     * @param clientName
+     * @param projectNames
+     * @param calenderName
+     * @param dateList
+     * @param propertyMap
+     * @param columnIndex
+     * @param row
+     */
+    private void populateFieldsAboveTable(final String clientName, final String projectNames, final String calenderName,
+	    final List<Date> dateList, final Map<String, String> propertyMap, final int columnIndex, final Row row) {
+	final Cell cell = row.getCell(columnIndex);
+
+	if (cell != null) {
+	    cell.setCellType(CellType.STRING);
+	}
+
+	Cell valueCell;
+	if ((cell != null) && (cell.getStringCellValue() != null) && !cell.getStringCellValue().isEmpty()) {
+	    final String cellValue = cell.getStringCellValue().trim();
+	    if (cellValue.equals(propertyMap.get(CalendarConstant.STAFF_HEADER))) {
+		valueCell = row.getCell(columnIndex + 1);
+		valueCell.setCellValue(calenderName);
+	    } else if (cellValue.equals(propertyMap.get(CalendarConstant.FROM_HEADER))) {
+		valueCell = row.getCell(columnIndex + 1);
+		valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(dateList.get(0)));
+	    } else if (cellValue.equals(propertyMap.get(CalendarConstant.TO_HEADER))) {
+		valueCell = row.getCell(columnIndex + 1);
+		valueCell.setCellValue(CalendarConstant.EXCEL_HEADER_DATE_FORMAT.format(dateList.get(1)));
+	    } else if (cellValue.equals(propertyMap.get(CalendarConstant.CLIENTS_HEADER))) {
+		valueCell = row.getCell(columnIndex + 1);
+		valueCell.setCellValue(clientName);
+	    } else if (cellValue.equals(propertyMap.get(CalendarConstant.PROJECTS_HEADER))) {
+		valueCell = row.getCell(columnIndex + 1);
+		valueCell.setCellValue(projectNames);
 	    }
 	}
     }
@@ -238,21 +270,23 @@ public class ExcelServiceImpl implements ExcelService {
      * @return row number
      */
     private int getStartHeader(final Sheet sheet, final int columnSize, final Map<String, String> inputMap) {
-	for (int rowIndex = 0; true; rowIndex++) {
+	for (int rowIndex = 0; rowIndex < 40; rowIndex++) {
 	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 		final Row row = sheet.getRow(rowIndex);
 		if (row != null) {
 		    final Cell cell = row.getCell(columnIndex);
 		    final Cell nextCell = row.getCell(columnIndex + 1);
-		    if ((cell != null) && (cell.getStringCellValue() != null) && !cell.getStringCellValue().isEmpty()
-			    && (nextCell != null) && (nextCell.getStringCellValue() != null)
-			    && inputMap.values().contains(cell.getStringCellValue().trim())
+		    final boolean isCellNull = (cell != null) && (cell.getStringCellValue() != null)
+			    && !cell.getStringCellValue().isEmpty();
+		    final boolean isNextCellNull = (nextCell != null) && (nextCell.getStringCellValue() != null);
+		    if (isCellNull && isNextCellNull && inputMap.values().contains(cell.getStringCellValue().trim())
 			    && inputMap.values().contains(nextCell.getStringCellValue().trim())) {
 			return rowIndex;
 		    }
 		}
 	    }
 	}
+	return 0;
     }
 
     /**

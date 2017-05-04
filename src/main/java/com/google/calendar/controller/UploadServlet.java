@@ -3,6 +3,7 @@ package com.google.calendar.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,7 +36,6 @@ import com.google.calendar.constant.CalendarConstant;
 import com.google.calendar.csv.reader.CSVReader;
 import com.google.calendar.excel.output.ExcelService;
 import com.google.calendar.exception.ExcelFormatException;
-import com.google.calendar.exception.InvalidEventException;
 import com.google.calendar.factory.ServiceFactory;
 import com.google.calendar.service.CalendarService;
 import com.google.calendar.util.EventTitleParser;
@@ -65,7 +65,7 @@ public class UploadServlet extends HttpServlet {
     public void doPost(final HttpServletRequest request, final HttpServletResponse response)
 	    throws ServletException, IOException {
 
-	InputStream inputStream = null;
+	// final InputStream inputStream = null;
 	Event firstEvent = null;
 	try {
 	    response.setContentType(CalendarConstant.CONTENT_TYPE);
@@ -78,8 +78,8 @@ public class UploadServlet extends HttpServlet {
 		    .asList(inputMap.get(CalendarConstant.CALENDAR).split(CalendarConstant.COMMA_SPLITTER));
 	    final String templatePath = inputMap.get(CalendarConstant.TEMPLATE) != null
 		    ? inputMap.get(CalendarConstant.TEMPLATE) : CalendarConstant.TEMPLATE_FILE_NAME;
-	    String resultPath = inputMap.get(CalendarConstant.OUTFILE) != null ? inputMap.get(CalendarConstant.OUTFILE)
-		    : CalendarConstant.RESULT_FILE_NAME;
+	    final String resultPath = inputMap.get(CalendarConstant.OUTFILE) != null
+		    ? inputMap.get(CalendarConstant.OUTFILE) : CalendarConstant.RESULT_FILE_NAME;
 	    final String inOutPath = inputMap.get(CalendarConstant.INOUTMAP) != null
 		    ? inputMap.get(CalendarConstant.INOUTMAP) : CalendarConstant.CONFIGURATION_FILE_NAME;
 
@@ -139,13 +139,8 @@ public class UploadServlet extends HttpServlet {
 
 			    logger.info("Parsing all events for calendars .............");
 			    for (final Event event : items) {
-				try {
-				    firstEvent = parsingEvents(firstEvent, projectNameAsList, clientNameAsList,
-					    excelData, event, inOutPath, calendarListEntry.getSummary());
-				} catch (final Exception e) {
-				    logger.info("Event with uncompiled name is found");
-				    excelData.put(event.getSummary(), null);
-				}
+				firstEvent = parsingEvents(firstEvent, inOutPath, projectNameAsList, clientNameAsList,
+					excelData, calendarListEntry, event);
 			    }
 			}
 		    }
@@ -159,23 +154,7 @@ public class UploadServlet extends HttpServlet {
 	    final ExcelService excelService = (ExcelService) ServiceFactory.getInstance(ExcelService.class);
 	    excelService.generateExcel(templatePath, inOutPath, excelData, dateList, resultPath);
 
-	    if (firstEvent != null) {
-		final File file = new File(CalendarConstant.RESULT_FILE_NAME.equals(resultPath)
-			? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
-		inputStream = new FileInputStream(file);
-
-		if (!resultPath.equals(CalendarConstant.RESULT_FILE_NAME)) {
-		    final String[] splitPathArr = resultPath.split("\\\\");
-		    resultPath = splitPathArr[splitPathArr.length - 1];
-		}
-		response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + resultPath);
-		final OutputStream outstream = response.getOutputStream();
-		IOUtils.copyLarge(inputStream, outstream);
-		request.setAttribute(CalendarConstant.ERROR_MESSAGE, "");
-	    } else {
-		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_NO_EVENT_FOUND);
-		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
-	    }
+	    downloadFile(request, response, firstEvent, resultPath);
 
 	} catch (final ParseException e) {
 	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
@@ -197,8 +176,13 @@ public class UploadServlet extends HttpServlet {
 
 	} catch (final TokenResponseException e) {
 	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
-	    request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_GOOGLE_AUTHENTICATION);
-	    request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+	    try {
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_GOOGLE_AUTHENTICATION);
+		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+	    } catch (ServletException | IOException e1) {
+		logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
+	    }
 	} catch (final Exception e) {
 	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
 
@@ -210,46 +194,76 @@ public class UploadServlet extends HttpServlet {
 		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
 	    }
 
-	} finally {
-	    if (inputStream != null) {
-		inputStream.close();
-	    }
 	}
     }
 
     /**
-     * This method checks whether the event passed "Has to be added to output
-     * file or not" if YES then is added to another Map. Otherwise not.
      *
      * @param firstEvent
-     *            used to check whether we have a single event or not.
-     * @param projectName
-     *            name of project for which output file is to be created
-     * @param clientName
-     *            name of client for which output file is to be created
+     * @param inOutPath
+     * @param projectNameAsList
+     * @param clientNameAsList
      * @param excelData
-     *            empty map which will contain event and its key-value pair
+     * @param calendarListEntry
      * @param event
-     *            event to be checked for adding to excel output file
-     * @param configurationFilePath
-     * @param calendarName
      * @return
-     * @throws InvalidEventException
      */
-    private Event parsingEvents(Event firstEvent, final List<String> projectName, final List<String> clientName,
-	    final Map<String, Map<String, String>> excelData, final Event event, final String configurationFilePath,
-	    final String calendarName) throws InvalidEventException {
-	final EventTitleParser eventTitleParser = new EventTitleParser();
-	final Map<String, Map<String, String>> eventKeyValue = eventTitleParser.generateMapForEvents(event,
-		configurationFilePath, calendarName);
-	final String eventSummary = event.getSummary();
+    private Event parsingEvents(final Event firstEvent, final String inOutPath, final List<String> projectNameAsList,
+	    final List<String> clientNameAsList, final Map<String, Map<String, String>> excelData,
+	    final CalendarListEntry calendarListEntry, final Event event) {
+	Event validEvent = firstEvent;
+	try {
+	    final EventTitleParser eventTitleParser = new EventTitleParser();
+	    final Map<String, Map<String, String>> eventKeyValue = eventTitleParser.generateMapForEvents(event,
+		    inOutPath, calendarListEntry.getSummary());
+	    final String eventSummary = event.getSummary();
 
-	if ((clientName.isEmpty() && projectName.isEmpty())
-		|| (clientName.contains(eventKeyValue.get(eventSummary).get(CalendarConstant.CLI_LOWER_CASE)))
-		|| (projectName.contains(eventKeyValue.get(eventSummary).get(CalendarConstant.PRJ_LOWER_CASE)))) {
-	    excelData.put(eventSummary, eventKeyValue.get(eventSummary));
-	    firstEvent = event;
+	    if ((clientNameAsList.isEmpty() && projectNameAsList.isEmpty())
+		    || (clientNameAsList.contains(eventKeyValue.get(eventSummary).get(CalendarConstant.CLI_LOWER_CASE)))
+		    || (projectNameAsList
+			    .contains(eventKeyValue.get(eventSummary).get(CalendarConstant.PRJ_LOWER_CASE)))) {
+		excelData.put(eventSummary, eventKeyValue.get(eventSummary));
+		validEvent = event;
+	    }
+	} catch (final Exception e) {
+	    logger.info("Event with uncompiled name is found");
+	    logger.error(CalendarConstant.ERROR_INVALID_EVENT_FOUND, e);
+	    excelData.put(event.getSummary(), null);
 	}
-	return firstEvent;
+	return validEvent;
+    }
+
+    private InputStream downloadFile(final HttpServletRequest request, final HttpServletResponse response,
+	    final Event firstEvent, final String resultPath) throws FileNotFoundException, IOException {
+	String outputPath = resultPath;
+	InputStream inputStream = null;
+	if (firstEvent != null) {
+	    final File file = new File(CalendarConstant.RESULT_FILE_NAME.equals(resultPath)
+		    ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
+	    inputStream = new FileInputStream(file);
+
+	    if (!resultPath.equals(CalendarConstant.RESULT_FILE_NAME)) {
+		final String[] splitPathArr = resultPath.split("\\\\");
+		outputPath = splitPathArr[splitPathArr.length - 1];
+	    }
+	    response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + outputPath);
+	    final OutputStream outstream = response.getOutputStream();
+	    IOUtils.copyLarge(inputStream, outstream);
+	    request.setAttribute(CalendarConstant.ERROR_MESSAGE, "");
+	    try {
+		inputStream.close();
+	    } catch (final Exception e) {
+		logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
+	    }
+	} else {
+	    request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_NO_EVENT_FOUND);
+	    try {
+		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+	    } catch (ServletException | IOException e1) {
+		logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);
+		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_LOADING);
+	    }
+	}
+	return inputStream;
     }
 }

@@ -45,13 +45,13 @@ public class CalendarServiceImpl implements CalendarService {
 	    ".credentials/calendar-java-quickstart");
 
     /** Global instance of the {@link FileDataStoreFactory}. */
-    private static FileDataStoreFactory DATA_STORE_FACTORY;
+    private static FileDataStoreFactory dataStoreFactory;
 
     /** Global instance of the JSON factory. */
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
     /** Global instance of the HTTP transport. */
-    private static HttpTransport HTTP_TRANSPORT;
+    private static HttpTransport httpTransport;
 
     public final Logger logger = Logger.getLogger(CalendarServiceImpl.class);
 
@@ -66,8 +66,8 @@ public class CalendarServiceImpl implements CalendarService {
     public CalendarServiceImpl() {
 	super();
 	try {
-	    HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-	    DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+	    httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+	    dataStoreFactory = new FileDataStoreFactory(DATA_STORE_DIR);
 	} catch (final Exception t) {
 	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, t);
 	    System.exit(1);
@@ -76,7 +76,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.google.calendar.service.CalendarService#getCalendarService(javax.
      * servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -85,7 +85,7 @@ public class CalendarServiceImpl implements CalendarService {
     public Calendar getCalendarService(final HttpServletRequest request, final HttpServletResponse response)
 	    throws IOException {
 	final Credential credential = authorize(request, response);
-	return new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME)
+	return new Calendar.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME)
 		.build();
     }
 
@@ -105,9 +105,9 @@ public class CalendarServiceImpl implements CalendarService {
 	    final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
 	    // Build flow and trigger user authorization request.
-	    final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
-		    JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY)
-			    .setAccessType("offline").build();
+	    final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport,
+		    JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(dataStoreFactory).setAccessType("offline")
+			    .build();
 	    return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
 
 	} catch (final Exception e) {

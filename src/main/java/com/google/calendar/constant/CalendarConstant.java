@@ -80,6 +80,8 @@ public class CalendarConstant {
 
     public static final String ERROR_NO_EVENT_FOUND = "No Events Found";
 
+    public static final String ERROR_INVALID_EVENT_FOUND = "Invalid Event Found";
+
     // Special Strings
 
     public static final String COMMA_SPLITTER = ",";

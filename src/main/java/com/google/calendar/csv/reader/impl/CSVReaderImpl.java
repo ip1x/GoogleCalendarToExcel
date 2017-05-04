@@ -53,9 +53,6 @@ public class CSVReaderImpl implements CSVReader {
 
 	// Create input from CSV
 	BufferedReader bufferReader = null;
-	String line = "";
-
-	String lastKey = "";
 	final Map<String, String> inputMap = new LinkedHashMap<>();
 
 	try {
@@ -76,24 +73,7 @@ public class CSVReaderImpl implements CSVReader {
 	    bufferReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 
 	    logger.info("Reading CSV file.............");
-	    if ((line = bufferReader.readLine()) != null) {
-
-		final String[] argument = line.split(" ");
-		for (final String string : argument) {
-		    final String[] keyValue = string.split(CalendarConstant.COL_SPLITTER, 2);
-		    if ((keyValue != null) && (keyValue.length == 2)) {
-			inputMap.put(keyValue[0].trim(), keyValue[1].trim());
-			lastKey = keyValue[0].trim();
-		    }
-		    if ((keyValue != null) && (keyValue.length == 1)) {
-			inputMap.replace(lastKey, inputMap.get(lastKey).concat(" ").concat(keyValue[0].trim()));
-		    }
-		}
-
-	    } else {
-		request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
-		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
-	    }
+	    generateMapForInput(request, response, bufferReader, inputMap);
 
 	} catch (final Exception e) {
 	    logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
@@ -115,6 +95,41 @@ public class CSVReaderImpl implements CSVReader {
 	}
 
 	return inputMap;
+    }
+
+    /**
+     *
+     * @param request
+     * @param response
+     * @param bufferReader
+     * @param lastKey
+     * @param inputMap
+     * @throws IOException
+     * @throws ServletException
+     */
+    private void generateMapForInput(final HttpServletRequest request, final HttpServletResponse response,
+	    final BufferedReader bufferReader, final Map<String, String> inputMap)
+	    throws IOException, ServletException {
+	String line;
+	String lastKey = "";
+	if ((line = bufferReader.readLine()) != null) {
+
+	    final String[] argument = line.split(" ");
+	    for (final String string : argument) {
+		final String[] keyValue = string.split(CalendarConstant.COL_SPLITTER, 2);
+		if ((keyValue != null) && (keyValue.length == 2)) {
+		    inputMap.put(keyValue[0].trim(), keyValue[1].trim());
+		    lastKey = keyValue[0].trim();
+		}
+		if ((keyValue != null) && (keyValue.length == 1)) {
+		    inputMap.replace(lastKey, inputMap.get(lastKey).concat(" ").concat(keyValue[0].trim()));
+		}
+	    }
+
+	} else {
+	    request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_IN_FILE_SELECTION);
+	    request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
+	}
     }
 
 }
