@@ -286,7 +286,7 @@ public class ExcelServiceImpl implements ExcelService {
 		}
 	    }
 	}
-	return 0;
+	return 40;
     }
 
     /**

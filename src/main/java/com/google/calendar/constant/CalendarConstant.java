@@ -11,10 +11,6 @@ import java.text.SimpleDateFormat;
  */
 public class CalendarConstant {
 
-    private CalendarConstant() {
-	// default constructor
-    }
-
     /**
      * Temporary file location.
      */
@@ -143,5 +139,9 @@ public class CalendarConstant {
     public static final String FROM_HEADER = "FromHeader";
 
     public static final String STAFF_HEADER = "StaffHeader";
+
+    private CalendarConstant() {
+	// default constructor
+    }
 
 }

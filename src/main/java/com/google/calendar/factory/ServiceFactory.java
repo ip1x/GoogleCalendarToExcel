@@ -27,6 +27,7 @@ public class ServiceFactory {
      *
      * @param className
      * @return
+     * @throws Exception
      */
     @SuppressWarnings("rawtypes")
     public static Object getInstance(final Class className) {
@@ -38,7 +39,7 @@ public class ServiceFactory {
 	} else if (ExcelService.class.equals(className)) {
 	    return new ExcelServiceImpl();
 	} else {
-	    throw new RuntimeException();
+	    throw new ClassCastException();
 	}
 
     }
