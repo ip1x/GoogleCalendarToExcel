@@ -124,6 +124,8 @@ public class CalendarConstant {
 
     public static final String ACT_LOWER_CASE = "act";
 
+    public static final String WBS_LOWER_CASE = "wbs";
+
     public static final String STF_LOWER_CASE = "stf";
 
     public static final String STARTED_ON_LOWER_CASE = "startedon";

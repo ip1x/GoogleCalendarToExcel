@@ -23,11 +23,12 @@ public interface ExcelService {
      * @param inOutPath
      *            Configuration file location
      * @param excelData
-     *            event details
-     * @param startDate
-     *            event filter starting date
-     * @param endDate
-     *            event filter end date
+     *            Map containing Event title as KEy and its TAG-VALUE as VALUE.
+     * @param dateList
+     *            List of date containing "Start date" as first element and
+     *            "End date" as Second element
+     * @param resultPath
+     *            Output file location
      * @throws ExcelFormatException
      */
     public void generateExcel(String templatePath, String inOutPath, Map<String, Map<String, String>> excelData,
