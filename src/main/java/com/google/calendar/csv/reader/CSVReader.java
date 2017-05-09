@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author DAMCO
  */
+@FunctionalInterface
 public interface CSVReader {
 
     /**

@@ -12,6 +12,7 @@ import com.google.api.services.calendar.Calendar;
  *
  * @author DAMCO
  */
+@FunctionalInterface
 public interface CalendarService {
 
     /**

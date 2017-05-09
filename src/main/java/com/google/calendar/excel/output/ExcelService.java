@@ -12,6 +12,7 @@ import com.google.calendar.exception.ExcelFormatException;
  * @author DAMCO
  *
  */
+@FunctionalInterface
 public interface ExcelService {
 
     /**

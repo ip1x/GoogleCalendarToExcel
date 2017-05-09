@@ -77,7 +77,6 @@ public class ExcelServiceImpl implements ExcelService {
 		    eventKeyValue.put(entry.getKey(), eventDetails);
 		} else {
 
-		    // eventDetails = getDataFromEventName(entry, userName);
 		    eventKeyValue.put(entry.getKey(), entry.getValue());
 
 		}
@@ -85,7 +84,7 @@ public class ExcelServiceImpl implements ExcelService {
 	    }
 
 	    // basic details of sheet
-	    setHeaderValue(sheet, getValueFromKeyAsString(eventKeyValue, CalendarConstant.CLI_LOWER_CASE),
+	    setHeaderValue(getValueFromKeyAsString(eventKeyValue, CalendarConstant.CLI_LOWER_CASE),
 		    getValueFromKeyAsString(eventKeyValue, CalendarConstant.PRJ_LOWER_CASE),
 		    getValueFromKeyAsString(eventKeyValue, CalendarConstant.STF_LOWER_CASE), dateList, headerRow,
 		    columnSize, propertyMap);
@@ -221,8 +220,6 @@ public class ExcelServiceImpl implements ExcelService {
      * This method traverses all ROW and COLUMN to find the respective LABEL
      * whose value is to be populated by Event Values
      *
-     * @param sheet
-     *            Excel sheet in which data has to be populated
      * @param clientName
      *            Name of Client to be populated in HEADER portion of OUTPUT
      *            file for Label "Clients"
@@ -242,8 +239,8 @@ public class ExcelServiceImpl implements ExcelService {
      * @param propertyMap
      *            IN-OUT MAP containing data regarding OUTPUT file.
      */
-    private void setHeaderValue(final Sheet sheet, final String clientName, final String projectNames,
-	    final String calenderName, final List<Date> dateList, final int headerRow, final int columnSize,
+    private void setHeaderValue(final String clientName, final String projectNames, final String calenderName,
+	    final List<Date> dateList, final int headerRow, final int columnSize,
 	    final Map<String, String> propertyMap) {
 	for (int rowIndex = 0; rowIndex < headerRow; rowIndex++) {
 	    // Parses Each row of the particular column for populating data for
@@ -251,7 +248,7 @@ public class ExcelServiceImpl implements ExcelService {
 	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 		// Parses Each column of the particular row for populating data
 		// for each LABEL
-		final Row row = sheet.getRow(rowIndex);
+		final Row row = generateOutputExcel.getSheet().getRow(rowIndex);
 		if (row != null) {
 		    // if row exists
 		    populateFieldsAboveTable(clientName, projectNames, calenderName, dateList, propertyMap, columnIndex,

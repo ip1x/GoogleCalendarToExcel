@@ -90,7 +90,7 @@ public class EventTitleParser {
 		    && !"".equals(eventMap.get(CalendarConstant.ACT_LOWER_CASE))) {
 		// If value of WBS and ACT is not null and empty, then append
 		// value of WBS with ACT
-		eventMap.put(CalendarConstant.ACT_LOWER_CASE, eventMap.get(CalendarConstant.ACT_LOWER_CASE).concat("")
+		eventMap.put(CalendarConstant.ACT_LOWER_CASE, eventMap.get(CalendarConstant.ACT_LOWER_CASE).concat(",")
 			.concat(eventMap.get(CalendarConstant.WBS_LOWER_CASE)));
 	    } else {
 		// Otherwise put value of WBS in ACT

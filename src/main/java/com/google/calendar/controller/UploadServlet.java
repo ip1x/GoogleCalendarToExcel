@@ -65,7 +65,6 @@ public class UploadServlet extends HttpServlet {
     public void doPost(final HttpServletRequest request, final HttpServletResponse response)
 	    throws ServletException, IOException {
 
-	// final InputStream inputStream = null;
 	Event firstEvent = null;
 	try {
 	    response.setContentType(CalendarConstant.CONTENT_TYPE);
@@ -137,7 +136,7 @@ public class UploadServlet extends HttpServlet {
 				.setSingleEvents(true).execute();
 			final List<Event> items = events.getItems();
 			if (items.isEmpty()) {
-
+			    logger.info("No Events for the calendar : " + calendarListEntry.getSummary());
 			} else {
 
 			    logger.info("Parsing all events for calendars .............");
@@ -279,9 +278,9 @@ public class UploadServlet extends HttpServlet {
      * @throws IOException
      */
     private void downloadFile(final HttpServletRequest request, final HttpServletResponse response,
-	    final Event firstEvent, final String resultPath) throws FileNotFoundException, IOException {
+	    final Event firstEvent, final String resultPath) throws IOException {
 	String outputFileName = resultPath;
-	InputStream inputStream = null;
+	InputStream inputStream;
 	// If we have at least one event for output file then
 	if (firstEvent != null) {
 	    // Checks whether any OUTPUT file name was provided in the INPUT
