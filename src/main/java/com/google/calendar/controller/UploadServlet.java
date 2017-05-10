@@ -42,7 +42,7 @@ import com.google.calendar.util.EventTitleParser;
 
 /**
  * Controller class to Handle incoming request. This servlet reads CSV file as
- * input,process google calender's events and and generate Excel
+ * input,process google calender's events and generate Excel
  *
  * @author DAMCO
  */

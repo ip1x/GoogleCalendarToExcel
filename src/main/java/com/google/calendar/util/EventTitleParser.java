@@ -207,13 +207,12 @@ public class EventTitleParser {
     private void parseMapForInvalidTag(final List<String> configurationKeyList, final Map<String, String> eventMap)
 	    throws InvalidEventException {
 	// Parses MAP for existence of INVALID TAG
-	logger.debug("Event with VALID key-value pair are as follows..............");
+	logger.info("Event with VALID key-value pair are found..............");
 	for (final Map.Entry<String, String> entry : eventMap.entrySet()) {
 	    if (!configurationKeyList.contains(entry.getKey())) {
 		// If INVALID tag is found throws exception.
 		throw new InvalidEventException();
 	    }
-	    logger.debug(entry.getKey() + "=" + entry.getValue());
 	}
     }
 }

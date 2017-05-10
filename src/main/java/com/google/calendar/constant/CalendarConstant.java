@@ -78,13 +78,15 @@ public class CalendarConstant {
 
     public static final String ERROR_INVALID_EVENT_FOUND = "Invalid Event Found";
 
-    // Special Strings
+    // String constants used for splitting strings. String can be from INPUT or
+    // either from Events title
 
     public static final String COMMA_SPLITTER = ",";
 
     public static final String COL_SPLITTER = ":";
 
-    // CSV file field
+    // CSV file field. These are constants created for the TAGS of INPUT file.
+    // These are used to create MAP of INPUT file data
 
     public static final String CALENDAR = "CALENDAR";
 
@@ -102,7 +104,8 @@ public class CalendarConstant {
 
     public static final String TO = "TO";
 
-    // Default file names for input parameter
+    // Default file names for input parameter if no parameters are provided in
+    // the INPUT file
 
     public static final String TEMPLATE_FILE_NAME = "Timesheet.xls";
 
@@ -110,13 +113,17 @@ public class CalendarConstant {
 
     public static final String CONFIGURATION_FILE_NAME = "configuration.properties";
 
-    // Date format for output file
+    // Date format for output file. 1st format is used while populating
+    // fields of "From" or "To" of Output file. And other is used for populating
+    // "Start" and "End" date of Event.
 
     public static final Format EXCEL_HEADER_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
 
     public static final Format TABLE_DATE_FORMAT = new SimpleDateFormat("M/dd/yy HH:mm");
 
-    // Events Titles
+    // Events Titles. These are Event titles TAG as constants. As some of the
+    // TAGS cann't be DYNAMIC and are used in code for FILTERING purpose so have
+    // created CONSTANTS.
 
     public static final String CLI_LOWER_CASE = "cli";
 
@@ -131,6 +138,9 @@ public class CalendarConstant {
     public static final String STARTED_ON_LOWER_CASE = "startedon";
 
     public static final String ENDED_ON_LOWER_CASE = "endedon";
+
+    // These are the constants for the HEADER of OUTPUT file which is present
+    // above TABLE of OUTPUT file.
 
     public static final String PROJECTS_HEADER = "ProjectsHeader";
 
