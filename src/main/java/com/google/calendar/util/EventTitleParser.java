@@ -71,7 +71,6 @@ public class EventTitleParser {
 	    parseEventTitleForGeneratingMap(configurationKeyList, eventMap, trimWithSpace);
 	    parseMapForInvalidTag(configurationKeyList, eventMap);
 	} catch (final Exception e) {
-	    logger.error(CalendarConstant.ERROR_INVALID_EVENT_FOUND, e);
 	    throw new InvalidEventException();
 	}
 	final Map<String, Map<String, String>> eventKeyValue = new HashMap<>();

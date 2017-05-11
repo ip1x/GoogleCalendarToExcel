@@ -252,7 +252,6 @@ public class UploadServlet extends HttpServlet {
 	    }
 	} catch (final Exception e) {
 	    logger.info("Event with uncompiled name is found");
-	    logger.error(CalendarConstant.ERROR_INVALID_EVENT_FOUND, e);
 	    excelData.put(event.getSummary(), null);
 	}
 	return validEvent;
