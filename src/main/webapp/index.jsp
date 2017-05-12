@@ -54,9 +54,8 @@
 											<div class="file_input">
 												<label
 													class="image_input_button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored">
-													<i class="fa fa-chrome bgBox" aria-hidden="true"
-													title="Choose CSV file only"></i> Choose File <input
-													id="file_input_file" class="none" type="file" name="file" />
+													<span style="float: left; padding-right: 10px; cursor:pointer"><img src="img/searchIcon.jpg"></span> Choose File 
+													<input id="file_input_file" class="none" type="file" name="file" />
 												</label>
 											</div>
 
@@ -71,7 +70,7 @@
 									</div>
 
 										<span class="col-md-12" style="text-align: center;"><button type="submit"
-											class="btn btn-info btn-lg"
+											class="btn btn-unique btn-lg"
 											onclick="document.getElementById('error').innerHTML = ''">SUBMIT</button></span>
 <!-- 									<span class="col-md-6"><button type="submit" -->
 <!-- 											class="btn btn-info btn-lg" -->
