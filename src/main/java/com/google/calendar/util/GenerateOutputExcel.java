@@ -16,7 +16,7 @@ import com.google.calendar.exception.ExcelFormatException;
 import com.google.common.io.Files;
 
 /**
- * Will read excel file and create sheet for Data population.
+ * Will read excel file and create sheet for data population.
  *
  * @author DAMCO
  */

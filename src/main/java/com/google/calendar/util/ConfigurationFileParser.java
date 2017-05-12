@@ -20,8 +20,10 @@ import com.google.calendar.constant.CalendarConstant;
  */
 public class ConfigurationFileParser {
 
+    public final Logger logger = Logger.getLogger(ConfigurationFileParser.class);
+
     /**
-     * Property class which load with all key value pair
+     * Property class which will load with all key value pair
      */
     private Properties property;
 
@@ -30,10 +32,8 @@ public class ConfigurationFileParser {
      */
     private InputStream input = null;
 
-    public final Logger logger = Logger.getLogger(ConfigurationFileParser.class);
-
     /**
-     * Will contain all key pair.
+     * Map for configuration file.
      */
     private final Map<String, String> propertyMap = new HashMap<>();
 

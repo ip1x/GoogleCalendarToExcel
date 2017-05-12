@@ -25,8 +25,8 @@ import com.google.calendar.util.GenerateOutputExcel;
 import com.google.common.base.Joiner;
 
 /**
- * This class will generate excel file and populate event details from Google
- * calendars
+ * This class is used to generate excel file and populate event details from
+ * Google calendars.
  *
  * @author DAMCO
  */
@@ -63,7 +63,7 @@ public class ExcelServiceImpl implements ExcelService {
 
 	    final Sheet sheet = generateOutputExcel.getSheet();
 
-	    // Adding two dummy column to error free execution
+	    // Adding two dummy column
 	    final int columnSize = propertyMap.size() + 2;
 
 	    // Row number of table header
@@ -119,10 +119,10 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     /**
-     * This method will take one TAG of Event title from created MAP and search
-     * it with ROW and COLUMN, if the selected TAG is find, then it starts
-     * populating all Event values for that TAG in that Column. This is
-     * basically done for TABLE of OUTPUT file.
+     * This method is used to take one TAG of Event title from created MAP and
+     * search it with ROW and COLUMN, if the selected TAG is available, then it
+     * starts populating all Event values for that TAG in that Column. This is
+     * basically done for table of output file.
      *
      * @param sheet
      *            Excel sheet in which data has to be populated
@@ -139,7 +139,7 @@ public class ExcelServiceImpl implements ExcelService {
     @SuppressWarnings("rawtypes")
     public void setColumnsValue(final Sheet sheet, final int columnSize, final int headerRowNo,
 	    final Map<String, Map<String, String>> excelData, final Map<String, String> propertyMap) {
-	// Maximum row to be parsed for populating data as it cann't be greater
+	// Maximum row to be parsed for populating data as it can't be greater
 	// than "Table Header Row number" + "Number of Events"
 	final int lastRowSize = headerRowNo + excelData.size();
 	final Row headerRow = sheet.getRow(headerRowNo);
@@ -167,22 +167,21 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     /**
-     * This method is used to populate Data to OUTPUT TABLE.
-     * When a particular column of TABLE of OUTPUT file is found to be
-     * populated, then all events are parsed and populate their data to the
+     * This method is used to populate data to the output table.
+     * Value of configuration file is used to populate the data in the
      * respective column
      *
      * @param sheet
      *            Excel sheet in which data has to be populated
      * @param headerRowNo
-     *            row number at which header of TABLE is occurring
+     *            row number of header of TABLE.
      * @param excelData
-     *            Map of Event containing "Event summary" as KEY and Event
+     *            Map of Event containing Event title as KEY and Event
      *            KEY-VALUE pair as VALUE.
      * @param lastRowSize
      *            Last row number till which data can be populated.
      * @param propertyEntry
-     *            Individual element of Configuration IN-OUT Map.
+     *            Individual element of configuration IN-OUT Map.
      * @param columnIndex
      *            Column index at which data has been found.
      */
@@ -203,8 +202,7 @@ public class ExcelServiceImpl implements ExcelService {
 		    final String data = (String) ((Map) entry.getValue())
 			    .get(propertyEntry.getKey().toString().toLowerCase());
 		    if (data != null && !data.isEmpty()) {
-			// If data is not NULL and is NOT EMPTY, then value is
-			// set to the CELL
+
 			cell.setCellValue(
 				(String) ((Map) entry.getValue()).get(propertyEntry.getKey().toString().toLowerCase()));
 		    }
@@ -218,13 +216,13 @@ public class ExcelServiceImpl implements ExcelService {
 
     /**
      * This method traverses all ROW and COLUMN to find the respective LABEL
-     * whose value is to be populated by Event Values
+     * whose value is to be populated by event values
      *
      * @param clientName
-     *            Name of Client to be populated in HEADER portion of OUTPUT
-     *            file for Label "Clients"
+     *            Name of client to be populated in HEADER portion of OUTPUT
+     *            file for label "Clients"
      * @param projectNames
-     *            Name of Projects to be populated in HEADER portion of OUTPUT
+     *            Name of projects to be populated in HEADER portion of OUTPUT
      *            file for Label "Projects"
      * @param calenderName
      *            Name of Calendars to be populated in HEADER portion of OUTPUT
@@ -244,10 +242,9 @@ public class ExcelServiceImpl implements ExcelService {
 	    final Map<String, String> propertyMap) {
 	for (int rowIndex = 0; rowIndex < headerRow; rowIndex++) {
 	    // Parses Each row of the particular column for populating data for
-	    // each LABEL
+	    // each label
 	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
-		// Parses Each column of the particular row for populating data
-		// for each LABEL
+
 		final Row row = generateOutputExcel.getSheet().getRow(rowIndex);
 		if (row != null) {
 		    // if row exists
@@ -259,28 +256,28 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     /**
-     * This method is used to populate the HEADER fields of OUTPUT file Which is
-     * ABOVE TABLE. All values that are required to populate is passed in the
-     * Arguments.
+     * This method is used to populate the header fields of output file Which is
+     * above table. All values that are required to populate is passed as a
+     * arguments.
      *
      * @param clientName
-     *            Name of Client to be populated in HEADER portion of OUTPUT
-     *            file for Label "Clients"
+     *            Name of client to be populated in header portion of output
+     *            file for label "Clients"
      * @param projectNames
      *            Name of Projects to be populated in HEADER portion of OUTPUT
-     *            file for Label "Projects"
+     *            file for label "Projects"
      * @param calenderName
      *            Name of Calendars to be populated in HEADER portion of OUTPUT
-     *            file for Label "Staff"
+     *            file for label "Staff"
      * @param dateList
      *            List of date containing "Start date" as first element and
      *            "End date" as Second element
      * @param propertyMap
-     *            IN-OUT MAP containing data regarding OUTPUT file table.
+     *            IN-OUT MAP containing data regarding output file table.
      * @param columnIndex
-     *            index of column at which data is found for a particular LABEL
+     *            index of column at which data is found for a particular label
      * @param row
-     *            Row at which data is found for a particular LABEL.
+     *            Row at which data is found for a particular label.
      */
     private void populateFieldsAboveTable(final String clientName, final String projectNames, final String calenderName,
 	    final List<Date> dateList, final Map<String, String> propertyMap, final int columnIndex, final Row row) {
@@ -291,9 +288,9 @@ public class ExcelServiceImpl implements ExcelService {
 	}
 
 	Cell valueCell;
+
 	if ((cell != null) && (cell.getStringCellValue() != null) && !cell.getStringCellValue().isEmpty()) {
 
-	    // If Cell value is NOT NULL and is IS NOT EMPTY
 	    final String cellValue = cell.getStringCellValue().trim();
 	    if (cellValue.equals(propertyMap.get(CalendarConstant.STAFF_HEADER))) {
 		// If LABEL is equal to VALUE of "StaffHeader" KEY, put its
@@ -325,32 +322,32 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     /**
-     * This method is used to find the ROW number from where HEADERS of the
-     * Table of OUTPUT file starts
+     * This method is used to find the row number from where headers of the
+     * table of output file starts
      *
      * @param sheet
      *            Excel sheet in which data has to be populated
      * @param columnSize
-     *            maximum column to iterate for populating Events till which we
-     *            have to ITERATE
+     *            maximum column to iterate for populating events till which we
+     *            have to iterate.
      * @param inputMap
-     *            IN-OUT MAP containing data regarding OUTPUT file.
-     * @return row number Index of ROW from where HEADERS of the Table of OUTPUT
+     *            IN-OUT MAP containing data regarding output file.
+     * @return row number index from where headers of the table of output
      *         file starts
      */
     private int getStartHeader(final Sheet sheet, final int columnSize, final Map<String, String> inputMap) {
 	for (int rowIndex = 0; rowIndex < 40; rowIndex++) {
-	    // Iterate ROW till "40" rows.
+
 	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 		// Iterate COLUMN till "columnSize" column.
 		final Row row = sheet.getRow(rowIndex);
 		if (row != null) {
 		    final Cell cell = row.getCell(columnIndex);
 		    final Cell nextCell = row.getCell(columnIndex + 1);
-		    // Checks the CELL value for NULL and EMPTY
+
 		    final boolean isCellNull = (cell != null) && (cell.getStringCellValue() != null)
 			    && !cell.getStringCellValue().isEmpty();
-		    // Checks the next CELL value for NULL
+
 		    final boolean isNextCellNull = (nextCell != null) && (nextCell.getStringCellValue() != null);
 		    if (isCellNull && isNextCellNull && inputMap.values().contains(cell.getStringCellValue().trim())
 			    && inputMap.values().contains(nextCell.getStringCellValue().trim())) {
@@ -366,25 +363,25 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     /**
-     * Map of Event containing "Event summary" as KEY and Event
-     * KEY-VALUE pair as VALUE are parsed for the given "TAG" and when data is
+     * Map of Event containing event title as KEY and event
+     * KEY-VALUE pair as value are parsed for the given "TAG" and when data is
      * available for the given TAG, then they are concatenated by "," and are
      * stored in a different String
      *
      * @param keyValue
-     *            Map of Event containing "Event summary" as KEY and Event
-     *            KEY-VALUE pair as VALUE.
+     *            Map of Event containing event title as KEY and Event
+     *            KEY-VALUE pair as value.
      * @param eventKey
-     *            TAG of Event for which VALUES are to be fetched and are to be
+     *            TAG of Event for which value are to be fetched and are to be
      *            concatenated by ","
-     * @return String of VALUES of Event values separated by ","
+     * @return String of value of Event values separated by ","
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private String getValueFromKeyAsString(final Map<String, Map<String, String>> keyValue, final String eventKey) {
 
 	final Set<String> set = new HashSet();
 	for (final Entry entry : keyValue.entrySet()) {
-	    // Parses EACH eventMap VALUE for the given TAG.
+	    // Parses each eventMap value for the given TAG.
 	    set.add(((Map<String, String>) entry.getValue()).get(eventKey.trim()));
 	    // If found then, its VALUE is added to the SET of String
 	}

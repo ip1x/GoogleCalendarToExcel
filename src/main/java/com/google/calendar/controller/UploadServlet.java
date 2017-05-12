@@ -49,7 +49,7 @@ import com.google.calendar.util.EventTitleParser;
 public class UploadServlet extends HttpServlet {
 
     /**
-     * default serial version
+     * Default serial version
      */
     private static final long serialVersionUID = 1L;
 
@@ -73,8 +73,8 @@ public class UploadServlet extends HttpServlet {
 	    logger.info("Start Reading CSV file.............");
 	    final Map<String, String> inputMap = csvReader.readCSV(request, response);
 
-	    // Creates different variables for different input parameter from
-	    // map.
+	    // Prepares List for every Key-Value pair, used for filtering and
+	    // output purpose
 	    final List<String> calendarName = Arrays
 		    .asList(inputMap.get(CalendarConstant.CALENDAR).split(CalendarConstant.COMMA_SPLITTER));
 	    final String templatePath = inputMap.get(CalendarConstant.TEMPLATE) != null
@@ -83,8 +83,6 @@ public class UploadServlet extends HttpServlet {
 		    ? inputMap.get(CalendarConstant.OUTFILE) : CalendarConstant.RESULT_FILE_NAME;
 	    final String inOutPath = inputMap.get(CalendarConstant.INOUTMAP) != null
 		    ? inputMap.get(CalendarConstant.INOUTMAP) : CalendarConstant.CONFIGURATION_FILE_NAME;
-
-	    // optional need to check for null at the time of logic
 	    final List<String> projectNameAsList = inputMap.get(CalendarConstant.PROJECT) != null
 		    ? Arrays.asList(inputMap.get(CalendarConstant.PROJECT).split(CalendarConstant.COMMA_SPLITTER))
 		    : new ArrayList<>();
@@ -92,7 +90,7 @@ public class UploadServlet extends HttpServlet {
 		    ? Arrays.asList(inputMap.get(CalendarConstant.CLIENT).split(CalendarConstant.COMMA_SPLITTER))
 		    : new ArrayList<>();
 
-	    // created Date format for date 201703010000
+	    // Date format for input From and To date i.e. yyyyMMddHHmm
 	    final SimpleDateFormat dateFormat = new SimpleDateFormat(CalendarConstant.DATE_FORMAT);
 
 	    final java.util.Calendar today = java.util.Calendar.getInstance();
@@ -110,9 +108,7 @@ public class UploadServlet extends HttpServlet {
 	    final DateTime from = new DateTime(fromDate);
 	    final DateTime to = new DateTime(toDate);
 
-	    // Build a new authorized API client service.
-	    // Note: Do not confuse this class with the
-	    // com.google.api.services.calendar.model.Calendar class.
+	    // Used to fetch calendars for the specified user.
 	    final CalendarService calendarService = (CalendarService) ServiceFactory.getInstance(CalendarService.class);
 
 	    logger.info("Fetching all calendars for the user.............");
@@ -202,10 +198,8 @@ public class UploadServlet extends HttpServlet {
     }
 
     /**
-     * This method parses Event for a given calendar and applies filter on that
-     * event for CLIENT and PROJECT of input file. If that event fulfills the
-     * filtering OR condition than only it is used in output file, otherwise
-     * not.
+     * This method parses Event for a given calendar and filter the
+     * event on the basis of CLIENT and PROJECT.
      *
      * @param firstEvent
      *            Event used to check if there is at least one event for the
@@ -218,13 +212,13 @@ public class UploadServlet extends HttpServlet {
      *            Name of clients mentioned in INPUT file as List.
      * @param excelData
      *            Map of Events that will be used to generate output file. It
-     *            contains "Event summary" as KEY and Event KEY-VALUE pair as
+     *            contains Event title as KEY and Event KEY-VALUE pair as
      *            VALUE
      * @param calendarListEntry
-     *            Calendar of which event is parsing
+     *            Calendar for which event is parsing
      * @param event
      *            Event which is to be parsed
-     * @return firstEvent
+     * @return Event
      */
     private Event parsingEvent(final Event firstEvent, final String inOutPath, final List<String> projectNameAsList,
 	    final List<String> clientNameAsList, final Map<String, Map<String, String>> excelData,
@@ -239,15 +233,14 @@ public class UploadServlet extends HttpServlet {
 		    inOutPath, calendarListEntry.getSummary());
 	    final String eventSummary = event.getSummary();
 
-	    // Applies filtering to check whether Event is to be used in output
+	    // Applies filtering to check whether Event should be populated in
+	    // the output
 	    // file or not
 	    if ((clientNameAsList.isEmpty() && projectNameAsList.isEmpty())
 		    || (clientNameAsList.contains(eventKeyValue.get(eventSummary).get(CalendarConstant.CLI_LOWER_CASE)))
 		    || (projectNameAsList
 			    .contains(eventKeyValue.get(eventSummary).get(CalendarConstant.PRJ_LOWER_CASE)))) {
 		excelData.put(eventSummary, eventKeyValue.get(eventSummary));
-		// Puts the Event in a object, that means we have at least one
-		// event for the output file.
 		validEvent = event;
 	    }
 	} catch (final Exception e) {
@@ -258,19 +251,20 @@ public class UploadServlet extends HttpServlet {
     }
 
     /**
-     * This method generates output file for downloading. If value for OUTPUT
-     * file is passed in the INPUT file then that value is used for downloading
-     * file name otherwise an arbitrary predefined name is used for downloading
-     * file name.
+     * This method downloads the output file .Program will use the default value
+     * of
+     * name and location of the file if it doesn't get any information from the
+     * input file.
      *
      * @param request
-     *            HttpServlet request containing Client request.
+     *            HttpServlet request containing Input file.
      * @param response
-     *            HttpServlet response which will contain the download able file
+     *            HttpServlet response with download file
      * @param firstEvent
      *            Event used to check if there is at least one event for the
-     *            output file.If Yes, then file is downloaded otherwise an ERROR
-     *            message will be shown.
+     *            output file.If Yes, then the file will be downloaded otherwise
+     *            an ERROR
+     *            message will be shown up.
      * @param resultPath
      *            Output file path where file has to be downloaded
      * @throws FileNotFoundException
@@ -288,15 +282,13 @@ public class UploadServlet extends HttpServlet {
 		    ? CalendarConstant.DESTINATION_FILE_PATH : resultPath);
 	    inputStream = new FileInputStream(file);
 
-	    // If OUTPUT file name was provided in the INPUT file then
 	    if (!resultPath.equals(CalendarConstant.RESULT_FILE_NAME)) {
 		final String[] splitPathArr = resultPath.split("\\\\");
-		// Gets Output file name only not its full path
 		outputFileName = splitPathArr[splitPathArr.length - 1];
 	    }
 	    response.setHeader(CalendarConstant.CONTENT_HEADER, "attachment; filename=" + outputFileName);
 	    final OutputStream outstream = response.getOutputStream();
-	    // Output file for downloading is generated.
+	    // Generates output file.
 	    IOUtils.copyLarge(inputStream, outstream);
 	    request.setAttribute(CalendarConstant.ERROR_MESSAGE, "");
 	    try {
@@ -305,10 +297,10 @@ public class UploadServlet extends HttpServlet {
 		logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e);
 	    }
 	} else {
-	    // If don't have any Event for output file.
+
 	    request.setAttribute(CalendarConstant.ERROR_MESSAGE, CalendarConstant.ERROR_NO_EVENT_FOUND);
 	    try {
-		// Show error message that "No Events Found"
+
 		request.getRequestDispatcher(CalendarConstant.HOME_PAGE).forward(request, response);
 	    } catch (ServletException | IOException e1) {
 		logger.error(CalendarConstant.LOGGER_DEFAULT_MESSAGE, e1);

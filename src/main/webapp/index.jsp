@@ -8,7 +8,7 @@
 	content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-<title>Redisoft Pilot Project</title>
+<title>Redisoft Gcalendar2XLS Project</title>
 <!-- Font Awesome -->
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css">
@@ -40,7 +40,7 @@
 							<div class="card-block">
 								<!--Header-->
 								<div class="form-header purple darken-4">
-									<h3>Redisoft pilot project</h3>
+									<h3>Redisoft Gcalendar2XLS Project</h3>
 								</div>
 								<!--Body-->
 								<form action="/GoogleCalendarToExcel/csv" method="post"
@@ -70,12 +70,15 @@
 
 									</div>
 
-									<span class="col-md-6"><button type="submit"
+										<span class="col-md-12" style="text-align: center;"><button type="submit"
 											class="btn btn-info btn-lg"
 											onclick="document.getElementById('error').innerHTML = ''">SUBMIT</button></span>
-									<span class="col-md-6" style="text-align: right;"><input
-										type="button" class="btn btn-info btn-lg"
-										onclick="window.close();" value="CLOSE" /></span>
+<!-- 									<span class="col-md-6"><button type="submit" -->
+<!-- 											class="btn btn-info btn-lg" -->
+<!-- 											onclick="document.getElementById('error').innerHTML = ''">SUBMIT</button></span> -->
+<!-- 									<span class="col-md-6" style="text-align: right;"><input -->
+<!-- 										type="button" class="btn btn-info btn-lg" -->
+<!-- 										onclick="window.close();" value="CLOSE" /></span> -->
 								</form>
 
 							</div>
@@ -94,9 +97,9 @@
 								<h4 class="card-title">Steps how to use</h4>
 								<!--Text-->
 								<ol>
-									<li>Click "Browse" button to choose the input CSV file</li>
-									<li>Click "Submit" to upload this file"</li>
-									<li>The output file will be downloaded</li>
+									<li>Click "Browse" icon to choose the input CSV file</li>
+									<li>Click "Submit" button to upload input file</li>
+									<li>The output file will get downloaded</li>
 									<li>Click the file to open it</li>
 								</ol>
 							</div>
