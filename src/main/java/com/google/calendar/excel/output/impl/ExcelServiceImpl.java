@@ -336,7 +336,8 @@ public class ExcelServiceImpl implements ExcelService {
      *         file starts
      */
     private int getStartHeader(final Sheet sheet, final int columnSize, final Map<String, String> inputMap) {
-	for (int rowIndex = 0; rowIndex < 40; rowIndex++) {
+	int max_header_row_count = 40;
+	for (int rowIndex = 0; true; rowIndex++) {
 
 	    for (int columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 		// Iterate COLUMN till "columnSize" column.
@@ -358,8 +359,11 @@ public class ExcelServiceImpl implements ExcelService {
 		    }
 		}
 	    }
+	    --max_header_row_count;
+	    if (max_header_row_count == 0) {
+		return 40;
+	    }
 	}
-	return 40;
     }
 
     /**
@@ -382,8 +386,11 @@ public class ExcelServiceImpl implements ExcelService {
 	final Set<String> set = new HashSet();
 	for (final Entry entry : keyValue.entrySet()) {
 	    // Parses each eventMap value for the given TAG.
-	    set.add(((Map<String, String>) entry.getValue()).get(eventKey.trim()));
-	    // If found then, its VALUE is added to the SET of String
+	    final String eventTagValueForKey = ((Map<String, String>) entry.getValue()).get(eventKey.trim());
+	    if (eventTagValueForKey != null && !eventTagValueForKey.trim().isEmpty()) {
+		set.add(((Map<String, String>) entry.getValue()).get(eventKey.trim()));
+		// If found then, its VALUE is added to the SET of String
+	    }
 	}
 	set.removeIf(Objects::isNull);
 	// values of SET is concatenated by "," and is returned
